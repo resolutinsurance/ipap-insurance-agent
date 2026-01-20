@@ -20,6 +20,10 @@ export const PAYMENT_STEPS = {
     title: "Declaration",
     description: "Review and accept terms",
   },
+  REPAYMENT_SCHEDULE_PREVIEW: {
+    title: "Repayment Schedule",
+    description: "Preview your repayment schedule",
+  },
   PAYMENT_DETAILS: {
     title: "Payment Details",
     description: "Enter payment information",
@@ -52,6 +56,7 @@ export const CUSTOMER_SELF_VERIFICATION_STEPS: Step[] = [
     description: "Verify your identity with your Ghana Card",
   },
   PAYMENT_STEPS.DECLARATION,
+  PAYMENT_STEPS.REPAYMENT_SCHEDULE_PREVIEW,
   PAYMENT_STEPS.PAYMENT_DETAILS,
   PAYMENT_STEPS.VERIFY_PAYMENT,
 ];
@@ -80,6 +85,7 @@ export const getStandardPaymentSteps = (
     baseSteps.push(
       PAYMENT_STEPS.LOAN_CALCULATION,
       PAYMENT_STEPS.DECLARATION,
+      PAYMENT_STEPS.REPAYMENT_SCHEDULE_PREVIEW,
       PAYMENT_STEPS.PAYMENT_DETAILS,
       PAYMENT_STEPS.VERIFY_PAYMENT
     );

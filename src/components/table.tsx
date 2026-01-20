@@ -88,6 +88,7 @@ export function RenderDataTable<T>(props: {
   onSearch?: (value: string) => void;
   title: string;
   showDateFilter?: boolean;
+  showColumnsFilter?: boolean;
   /** Show export action button (defaults to true) */
   showExportAction?: boolean;
   /** Export configuration - uses default config derived from columns if not provided */
@@ -108,6 +109,7 @@ export function RenderDataTable<T>(props: {
 }) {
   // Default showExportAction to true
   const showExportAction = props.showExportAction ?? true;
+  const showColumnsFilter = props.showColumnsFilter ?? true;
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -188,8 +190,8 @@ export function RenderDataTable<T>(props: {
   return (
     <div className={cn("w-full", props.className)}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="space-y-3 my-3 sm:my-5">
-          {props.hideTitle !== true && (
+        <div className="space-y-3">
+          {!props.hideTitle && (
             <h1 className="text-lg sm:text-[22px] font-semibold">{props.title}</h1>
           )}
           {props.clickableFilterItems && props.clickableFilterItems.length && (
@@ -208,7 +210,7 @@ export function RenderDataTable<T>(props: {
             </ul>
           )}
         </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-5 py-2 sm:py-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-5">
           {showExportAction && (
             <Button
               variant="outline"
@@ -263,31 +265,33 @@ export function RenderDataTable<T>(props: {
               )}
             </div>
           )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild className="text-muted-foreground border">
-              <Button variant="ghost" className="sm:w-auto sm:ml-auto">
-                <span>Columns</span>
-                <ChevronDownIcon className="ml-2 h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {showColumnsFilter && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild className="text-muted-foreground border">
+                <Button variant="ghost" className="sm:w-auto sm:ml-auto">
+                  <span>Columns</span>
+                  <ChevronDownIcon className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
       <div className="overflow-x-auto">

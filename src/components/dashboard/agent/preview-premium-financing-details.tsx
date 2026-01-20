@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { usePremiumFinancingById } from "@/hooks/use-premium-financing";
+import { PaymentVerificationState } from "@/lib/store/payment-verification";
 import { formatCurrencyToGHS } from "@/lib/utils";
 
 const PreviewPremiumFinancingDetails = ({
@@ -11,11 +12,7 @@ const PreviewPremiumFinancingDetails = ({
 }: {
   id: string;
   onCancel: () => void;
-  onNext?: (loanData?: {
-    initialDeposit: number;
-    duration: number;
-    paymentFrequency: string;
-  }) => void;
+  onNext?: (loanData?: PaymentVerificationState["loanData"]) => void;
 }) => {
   const { getPremiumFinancingById } = usePremiumFinancingById(id);
 

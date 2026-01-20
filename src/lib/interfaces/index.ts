@@ -1589,7 +1589,7 @@ export interface PaymentSchedule {
   method: string;
   methodCode: string;
   methodName: string;
-  paymentFrequency: string;
+  paymentFrequency: PaymentFrequency;
   quoteType: string;
   noofInstallments: number;
   duration?: number;
@@ -1750,3 +1750,14 @@ export interface ConfirmAutoDebitOTPRequest {
 export interface ResendOTPRequest {
   pfId: string;
 }
+
+export interface PremiumFinancingScheduleRequest {
+  initialDeposit: string;
+  totalRepayment: string;
+  totalPaid: string;
+  loanAmount: string;
+  noofInstallments: number;
+  paymentFrequency: PaymentFrequency;
+}
+
+export type PaymentFrequency = "daily" | "weekly" | "monthly";

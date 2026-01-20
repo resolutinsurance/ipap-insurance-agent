@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAutoCalculatePremiumFinancing } from "@/hooks/use-premium-financing";
+import { PaymentFrequency } from "@/lib/interfaces";
 import { paymentVerificationAtom } from "@/lib/store";
 import type { PaymentVerificationState } from "@/lib/store/payment-verification";
 import { useAtom, WritableAtom } from "jotai";
@@ -44,7 +45,7 @@ export function LoanCalculationStep({
 
   const [initialDeposit, setInitialDeposit] = React.useState(loanData.initialDeposit);
   const [duration, setDuration] = React.useState(loanData.duration);
-  const [paymentFrequency, setPaymentFrequency] = React.useState(
+  const [paymentFrequency, setPaymentFrequency] = React.useState<PaymentFrequency>(
     loanData.paymentFrequency
   );
 
@@ -54,7 +55,7 @@ export function LoanCalculationStep({
     (updates: {
       initialDeposit?: number;
       duration?: number;
-      paymentFrequency?: string;
+      paymentFrequency?: PaymentFrequency;
     }) => {
       setPaymentVerification((prev) => {
         const currentLoanData = prev.loanData || {
@@ -84,7 +85,7 @@ export function LoanCalculationStep({
     updateLoanData({ duration: value });
   };
 
-  const handlePaymentFrequencyChange = (value: string) => {
+  const handlePaymentFrequencyChange = (value: PaymentFrequency) => {
     setPaymentFrequency(value);
     updateLoanData({ paymentFrequency: value });
   };
@@ -150,6 +151,17 @@ export function LoanCalculationStep({
               initialDeposit,
               duration,
               paymentFrequency,
+              // Persist calculated summary fields (used later for repayment schedule preview)
+              ...(calculatePremiumFinancingData.data
+                ? {
+                    noofInstallments: calculatePremiumFinancingData.data.noofInstallments,
+                    loanAmount: calculatePremiumFinancingData.data.loanAmount,
+                    totalRepayment: calculatePremiumFinancingData.data.totalRepayment,
+                    totalPaid: calculatePremiumFinancingData.data.totalPaid,
+                    regularInstallment:
+                      calculatePremiumFinancingData.data.regularInstallment,
+                  }
+                : {}),
             };
 
             // Update state with final loanData - use functional update to ensure we have latest state

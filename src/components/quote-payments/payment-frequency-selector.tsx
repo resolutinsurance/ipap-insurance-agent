@@ -7,10 +7,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PAYMENT_FREQUENCIES } from "@/lib/constants/bundle";
+import { PaymentFrequency } from "@/lib/interfaces";
 
 interface PaymentFrequencySelectorProps {
-  value: string;
-  onChange: (value: string) => void;
+  value: PaymentFrequency;
+  onChange: (value: PaymentFrequency) => void;
   id?: string;
   label?: string;
   options?: string[];

@@ -8,9 +8,15 @@ import { useAgent, usePolicyInfoMutation } from "@/hooks/use-agent";
 import { useAuth } from "@/hooks/use-auth";
 import { prepareObjectFields } from "@/lib/data-renderer";
 import {
+  directPaymentVerificationAtom,
+  getDefaultPaymentVerificationState,
+} from "@/lib/store";
+import { clearPaymentSession } from "@/lib/store/payment-storage";
+import {
   transformPolicyTypeToQuoteType,
   transformQuoteTypeToProductType,
 } from "@/lib/utils";
+import { useSetAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -21,6 +27,7 @@ export const LoyaltyFetchPolicyDetails = () => {
   const [standardFlowUrl, setStandardFlowUrl] = useState<string | null>(null);
   const { user } = useAuth();
   const { agent } = useAgent();
+  const setDirectVerification = useSetAtom(directPaymentVerificationAtom);
 
   const {
     data: policyInfoData,
@@ -87,6 +94,10 @@ export const LoyaltyFetchPolicyDetails = () => {
             <p className="font-medium"> Policy Details: </p>
             <Button
               onClick={() => {
+                // Start a fresh payment session whenever user initiates a new Pay Small Small flow
+                clearPaymentSession();
+                setDirectVerification(getDefaultPaymentVerificationState("direct"));
+
                 setStandardFlowUrl(baseUrl);
                 setShowFlowDecider(true);
               }}

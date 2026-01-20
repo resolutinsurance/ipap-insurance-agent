@@ -1,3 +1,4 @@
+import { PaymentFrequency } from "../interfaces";
 import {
   MainUserGhanaCardVerificationResponse,
   PublicGhanaCardVerificationResponse,
@@ -41,7 +42,13 @@ export interface PaymentVerificationState {
   loanData?: {
     initialDeposit: number;
     duration: number;
-    paymentFrequency: string;
+    paymentFrequency: PaymentFrequency;
+    /** Calculated summary fields (used for repayment schedule preview / direct schedule endpoint) */
+    noofInstallments?: number;
+    loanAmount?: number;
+    totalRepayment?: number;
+    totalPaid?: number;
+    regularInstallment?: number;
   };
   // Payment details
   paymentData?: {

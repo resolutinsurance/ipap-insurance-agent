@@ -150,3 +150,35 @@ export interface MainUserGhanaCardVerificationResponse {
   code: string;
   msg: string;
 }
+
+export type PaymentScheduleDetailsResponse = APIResponse<PaymentScheduleDetails>;
+
+export interface PaymentScheduleItem {
+  installmentNumber: number;
+  paymentAmount: string;
+  amountPaid: string;
+  dueDate: string;
+  remainingBalance: string;
+  status: "overdue" | "pending" | "paid";
+  daysOverdue: number;
+}
+
+export interface PaymentScheduleSummary {
+  totalInstallments: number;
+  paidInstallments: number;
+  pendingInstallments: number;
+  overdueInstallments: number;
+}
+
+export interface PaymentScheduleDetails {
+  loanId: string;
+  initialDeposit: string;
+  totalRepayment: string;
+  regularInstallment: string;
+  loanAmount: string;
+  totalPaid: string;
+  paymentFrequency: string;
+  startDate: string;
+  schedule: PaymentScheduleItem[];
+  summary: PaymentScheduleSummary;
+}

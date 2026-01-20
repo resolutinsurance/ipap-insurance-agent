@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { CheckIcon } from "lucide-react";
 
 export interface Step {
   title: string;
@@ -34,25 +35,7 @@ export function Stepper({
                     : "bg-gray-100 text-gray-500"
                 )}
               >
-                {currentStep > index + 1 ? (
-                  <svg
-                    className="w-3.5 h-3.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 16 12"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M1 5.917 5.724 10.5 15 1.5"
-                    />
-                  </svg>
-                ) : (
-                  <span>{index + 1}</span>
-                )}
+                {currentStep > index + 1 ? <CheckIcon /> : <span>{index + 1}</span>}
               </span>
               <h3
                 className={cn(
@@ -84,12 +67,7 @@ export function Stepper({
 
   // Vertical stepper (original)
   return (
-    <ol
-      className={cn(
-        "relative text-gray-500 border-s border-gray-200 dark:border-gray-700 dark:text-gray-400",
-        className
-      )}
-    >
+    <ol className={cn("relative text-gray-500 border-s border-gray-200", className)}>
       {steps.map((step, index) => (
         <li
           key={index}
@@ -97,31 +75,13 @@ export function Stepper({
         >
           <span
             className={cn(
-              "absolute flex items-center justify-center w-8 h-8 rounded-full -start-4 ring-4 ring-white dark:ring-gray-900",
+              "absolute flex items-center justify-center w-8 h-8 rounded-full -start-4 ring-4 ring-white",
               currentStep >= index + 1
                 ? "bg-primary text-white"
                 : "bg-gray-100 text-gray-500"
             )}
           >
-            {currentStep > index + 1 ? (
-              <svg
-                className="w-3.5 h-3.5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 16 12"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M1 5.917 5.724 10.5 15 1.5"
-                />
-              </svg>
-            ) : (
-              <span>{index + 1}</span>
-            )}
+            {currentStep > index + 1 ? <CheckIcon /> : <span>{index + 1}</span>}
           </span>
           <h3 className="font-medium leading-tight">{step.title}</h3>
           {showDescription && <p className="text-sm">{step.description}</p>}

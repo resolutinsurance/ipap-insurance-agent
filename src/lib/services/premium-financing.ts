@@ -13,7 +13,11 @@ import {
 } from "@/lib/interfaces";
 import api from "../api";
 import { DEFAULT_PAGE_SIZE } from "../constants";
-import { APIResponse, BundleResponse } from "../interfaces/response";
+import {
+  APIResponse,
+  BundleResponse,
+  PaymentScheduleDetailsResponse,
+} from "../interfaces/response";
 
 export const getAllPremiumFinancing = async (
   page: number = 1,
@@ -250,6 +254,39 @@ export const setupPremiumFinancing = async (
         (error as ApiError).response?.data?.message ||
           "Failed to setup premium financing. Please try again."
       );
+    }
+    throw new Error("Network error. Please check your connection and try again.");
+  }
+};
+
+export const getPremiumFinancingSchedule = async (
+  id: string
+): Promise<PaymentScheduleDetailsResponse> => {
+  try {
+    const response = await api.get(`/PremiumFinancing/schedule/${id}`);
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Network error. Please check your connection and try again.");
+  }
+};
+
+export const getDirectPremiumFinancingSchedule = async (paymentData: {
+  initialDeposit: string;
+  totalRepayment: string;
+  totalPaid: string;
+  loanAmount: string;
+  noofInstallments: number;
+  paymentFrequency: "daily" | "weekly" | "monthly";
+}): Promise<PaymentScheduleDetailsResponse> => {
+  try {
+    const response = await api.post(`/PremiumFinancing/direct-schedule`, paymentData);
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
     }
     throw new Error("Network error. Please check your connection and try again.");
   }

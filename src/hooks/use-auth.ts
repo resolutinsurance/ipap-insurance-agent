@@ -31,6 +31,7 @@ import { authLoadingAtom, userAtom } from "@/lib/store";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import Cookies from "js-cookie";
+import { toast } from "sonner";
 
 export const useAuth = () => {
   const [user, setUser] = useAtom(userAtom);
@@ -76,6 +77,7 @@ export const useAuth = () => {
       const userData = data.user;
       Cookies.set(COOKIE_KEYS.user, JSON.stringify(userData), COOKIE_OPTIONS);
 
+      console.log("data", data);
       if (data.refreshToken) {
         Cookies.set(COOKIE_KEYS.refreshToken, data.refreshToken, COOKIE_OPTIONS);
       }
@@ -115,6 +117,7 @@ export const useAuth = () => {
       if (data.role) {
         const role = data.role.role.toLowerCase();
         if (role !== USER_TYPES.AGENT.toLowerCase()) {
+          toast.error("You are not an agent");
           // Not an agent, logout
           logout(() => setUser(null));
           return;

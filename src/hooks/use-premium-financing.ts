@@ -12,10 +12,12 @@ import {
   calculatePremiumFinancingData,
   confirmAutoDebitOTP,
   decryptPremiumFinancingId,
+  getDirectPremiumFinancingSchedule,
   getPolicyDetails,
   getPremiumFinancingByBundleId,
   getPremiumFinancingByEntityId,
   getPremiumFinancingById,
+  getPremiumFinancingSchedule,
   purchaseBundleWithPremiumFinancing,
   purchaseWithPremiumFinancing,
   resendAutoDebitOTP,
@@ -428,5 +430,56 @@ export const useSetupPremiumFinancing = () => {
 
   return {
     setupPremiumFinancing: setupMutation,
+  };
+};
+
+export const usePremiumFinancingSchedule = (id: string) => {
+  const { isAuthenticated } = useAuth();
+  const premiumFinancingScheduleQuery = useQuery({
+    queryKey: ["get-premium-financing-schedule", id],
+    queryFn: async () => {
+      const response = await getPremiumFinancingSchedule(id);
+      if (!response) {
+        throw new Error("No data received from getPremiumFinancingSchedule");
+      }
+      return response;
+    },
+    enabled: isAuthenticated && !!id,
+  });
+
+  return {
+    getPremiumFinancingSchedule: premiumFinancingScheduleQuery,
+  };
+};
+
+export const useDirectPremiumFinancingSchedule = (paymentData?: {
+  initialDeposit: string;
+  totalRepayment: string;
+  totalPaid: string;
+  loanAmount: string;
+  noofInstallments: number;
+  paymentFrequency: "daily" | "weekly" | "monthly";
+}) => {
+  const { isAuthenticated } = useAuth();
+  const premiumFinancingScheduleQuery = useQuery({
+    queryKey: ["get-direct-premium-financing-schedule", paymentData],
+    queryFn: async () => {
+      if (!paymentData) {
+        throw new Error("Missing payment data for direct schedule");
+      }
+      const response = await getDirectPremiumFinancingSchedule(paymentData);
+      if (!response) {
+        throw new Error("No data received from getDirectPremiumFinancingSchedule");
+      }
+      return response;
+    },
+    enabled:
+      isAuthenticated &&
+      !!paymentData?.paymentFrequency &&
+      !!paymentData.noofInstallments,
+  });
+
+  return {
+    getPremiumFinancingSchedule: premiumFinancingScheduleQuery,
   };
 };

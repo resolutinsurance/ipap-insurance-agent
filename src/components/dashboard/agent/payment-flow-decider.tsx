@@ -37,15 +37,15 @@ const AgentPaymentFlowDecider = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4">
           <button
             type="button"
             onClick={onSelectStandard}
-            className="flex h-40 flex-col items-start justify-between rounded-lg border bg-muted/40 p-4 text-left transition hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="flex flex-col gap-2 items-start justify-between rounded-lg border bg-muted/40 p-4 text-left transition hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            <div>
+            <div className="space-y-1">
               <p className="text-sm font-semibold">Standard Agent Flow</p>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 Continue with the normal in-branch flow. You guide the customer through
                 all verification and payment steps.
               </p>
@@ -58,11 +58,11 @@ const AgentPaymentFlowDecider = ({
           <button
             type="button"
             onClick={onSelectRemote}
-            className="flex h-40 flex-col items-start justify-between rounded-lg border bg-muted/40 p-4 text-left transition hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="flex flex-col gap-2 items-start justify-between rounded-lg border bg-muted/40 p-4 text-left transition hover:border-primary hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            <div>
+            <div className="space-y-1">
               <p className="text-sm font-semibold">Agent Flow with remote verification</p>
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 You complete loan calculation and initial checks, then send a secure link
                 for the customer to finish verification and payment on their own device.
               </p>

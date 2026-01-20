@@ -6,8 +6,9 @@ import {
   TransactionJournalEntry,
   User,
 } from "@/lib/interfaces";
-import { formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
+import { PaymentScheduleItem } from "./interfaces/response";
 
 export const FINANCIAL_ENTRIES_COLUMNS: ColumnDef<FinancialAccountingEntry>[] = [
   {
@@ -331,3 +332,33 @@ export const createViewDetailsActionColumn = <T,>(
   header: "Actions",
   cell: ({ row }) => <ViewDetailsButton onClick={() => onViewDetails(row.original)} />,
 });
+
+export const PAYMENT_SCHEDULE_ITEM_COLUMNS: ColumnDef<PaymentScheduleItem>[] = [
+  {
+    accessorKey: "installmentNumber",
+    header: "Installment #",
+    cell: ({ row }) => (
+      <div className="font-medium">{row.getValue("installmentNumber")}</div>
+    ),
+  },
+  {
+    accessorKey: "paymentAmount",
+    header: "Payment Amount",
+    cell: ({ row }) => formatCurrency(row.getValue("paymentAmount")),
+  },
+  {
+    accessorKey: "amountPaid",
+    header: "Amount Paid",
+    cell: ({ row }) => formatCurrency(row.getValue("amountPaid")),
+  },
+  {
+    accessorKey: "dueDate",
+    header: "Due Date",
+    cell: ({ row }) => formatDate(row.getValue("dueDate"), false),
+  },
+  {
+    accessorKey: "remainingBalance",
+    header: "Remaining Balance",
+    cell: ({ row }) => formatCurrency(row.getValue("remainingBalance")),
+  },
+];

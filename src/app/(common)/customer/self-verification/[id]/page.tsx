@@ -5,6 +5,7 @@ import { DeclarationForm } from "@/components/dashboard/declaration/declaration-
 import ApprovalScreen from "@/components/dashboard/payment/approval-screen";
 import { GhanaCardVerificationStep } from "@/components/dashboard/payment/ghana-card-verification-step";
 import { PaymentDetailsStep } from "@/components/dashboard/payment/payment-details-step";
+import { RepaymentSchedulePreviewStep } from "@/components/dashboard/payment/repayment-schedule-preview-step";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Stepper, type Step } from "@/components/ui/stepper";
 import WidthConstraint from "@/components/ui/width-constraint";
@@ -154,7 +155,7 @@ const CustomerPremiumFinancingVerificationPage = () => {
           </CardHeader>
           <CardContent className="flex flex-col gap-6 md:flex-row">
             <div className="flex flex-col gap-6 md:flex-row p-5 w-full">
-              <div className="w-full md:w-64">
+              <div className="w-full md:w-64 lg:max-h-[500px]">
                 <Stepper steps={steps} currentStep={currentStep} className="h-auto" />
               </div>
 
@@ -218,7 +219,43 @@ const CustomerPremiumFinancingVerificationPage = () => {
                   />
                 )}
 
+                {/* Repayment Schedule Preview Step */}
                 {currentStep === 4 &&
+                  (isGhanaVerified && isDeclarationAccepted ? (
+                    financingId ? (
+                      <RepaymentSchedulePreviewStep
+                        paymentData={{
+                          initialDeposit: String(premiumFinancing?.initialDeposit ?? "0"),
+                          totalRepayment: String(premiumFinancing?.totalRepayment ?? "0"),
+                          totalPaid: String(premiumFinancing?.totalPaid ?? "0"),
+                          loanAmount: String(premiumFinancing?.loanAmount ?? "0"),
+                          noofInstallments: Number(
+                            premiumFinancing?.noofInstallments ?? 0
+                          ),
+                          paymentFrequency:
+                            premiumFinancing?.paymentFrequency || "monthly",
+                        }}
+                        onNext={() => setCurrentStep(5)}
+                        onCancel={() => setCurrentStep(3)}
+                      />
+                    ) : (
+                      <div className="text-center py-6 sm:py-8">
+                        <p className="text-muted-foreground text-sm sm:text-base">
+                          Premium finance ID is required to view repayment schedule
+                        </p>
+                      </div>
+                    )
+                  ) : (
+                    <div className="text-center py-6 sm:py-8">
+                      <p className="text-muted-foreground text-sm sm:text-base">
+                        {!isGhanaVerified
+                          ? "Please complete Ghana card verification first"
+                          : "Please complete the previous steps first"}
+                      </p>
+                    </div>
+                  ))}
+
+                {currentStep === 5 &&
                   (productTypeParam ? (
                     isGhanaVerified && isDeclarationAccepted ? (
                       <PaymentDetailsStep
@@ -232,10 +269,10 @@ const CustomerPremiumFinancingVerificationPage = () => {
                           const details = await submitPayment();
                           if (details) {
                             setApprovalDetails(details);
-                            setCurrentStep(5);
+                            setCurrentStep(6);
                           }
                         }}
-                        onCancel={() => setCurrentStep(3)}
+                        onCancel={() => setCurrentStep(4)}
                         isLoading={isPaymentSubmitting}
                       />
                     ) : (
@@ -255,7 +292,7 @@ const CustomerPremiumFinancingVerificationPage = () => {
                   ))}
 
                 {/* Verify Payment Step */}
-                {currentStep === 5 && approvalDetails && (
+                {currentStep === 6 && approvalDetails && (
                   <ApprovalScreen
                     type="premium-financing"
                     paymentId={approvalDetails.paymentId}

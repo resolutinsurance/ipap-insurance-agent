@@ -4,6 +4,7 @@ import ApprovalScreen from "@/components/dashboard/payment/approval-screen";
 import { GhanaCardVerificationStep } from "@/components/dashboard/payment/ghana-card-verification-step";
 import { LoanCalculationStep } from "@/components/dashboard/payment/loan-calculation-step";
 import { PaymentDetailsStep } from "@/components/dashboard/payment/payment-details-step";
+import { RepaymentSchedulePreviewStep } from "@/components/dashboard/payment/repayment-schedule-preview-step";
 import { Card, CardContent } from "@/components/ui/card";
 import { Stepper, type Step } from "@/components/ui/stepper";
 import WidthConstraint from "@/components/ui/width-constraint";
@@ -57,6 +58,7 @@ const PaymentDirectPage = () => {
   const isDeclarationAccepted = quoteVerificationState.declarationAccepted;
   const signatureFilename = quoteVerificationState.signatureFilename;
   const declarations = quoteVerificationState.declarations;
+  const loanData = quoteVerificationState.loanData;
 
   const isPremiumFinancing = paymentType === "premium-financing";
   const isInstallment = searchParams.get("isInstallment") === "true";
@@ -136,13 +138,6 @@ const PaymentDirectPage = () => {
     quoteVerificationState.ghanaVerified,
   ]);
 
-  // Clear verification state when quoteId or customerId changes (new payment session)
-  // Since sessionStorage is already session-specific, we just reset to initial state
-  React.useEffect(() => {
-    // Reset to initial state when starting a new payment session
-    setDirectVerification(getDefaultPaymentVerificationState("direct"));
-  }, [quoteId, customerId, setDirectVerification]);
-
   // Enforce verification requirement
   React.useEffect(() => {
     if (
@@ -171,8 +166,9 @@ const PaymentDirectPage = () => {
     if (isPremiumFinancing && !isInstallment) {
       if (stepName === "loan-calculation") return 2;
       if (stepName === "declaration") return 3;
-      if (stepName === "payment-details") return 4;
-      if (stepName === "verify") return 5;
+      if (stepName === "repayment-schedule") return 4;
+      if (stepName === "payment-details") return 5;
+      if (stepName === "verify") return 6;
     } else {
       if (stepName === "declaration") return 2;
       if (stepName === "payment-details") return 3;
@@ -212,10 +208,10 @@ const PaymentDirectPage = () => {
               <Stepper
                 steps={steps}
                 currentStep={currentStep}
-                className="w-full lg:w-[320px] h-auto lg:h-[120px]"
+                className="w-full lg:w-[320px] lg:max-h-[440px]"
               />
 
-              <div className="flex-1 max-w-xl">
+              <div className="flex-1 max-w-2xl">
                 {currentStep === 1 &&
                   (isVerificationLoading ? (
                     <div className="text-center py-6 sm:py-8">
@@ -259,13 +255,10 @@ const PaymentDirectPage = () => {
                       premiumAmount={premiumAmount}
                       verificationAtom={directPaymentVerificationAtom}
                       onNext={async () => {
-                        // Get the latest loanData from state before marking as calculated
-                        const latestLoanData = directVerification.loanData;
-
-                        // Ensure loanData is saved and mark as calculated
+                        // LoanCalculationStep already persists the full loanData (including summary fields)
+                        // Just mark the step as complete here to avoid overwriting with a stale snapshot.
                         await updateVerificationState({
                           loanCalculated: true,
-                          loanData: latestLoanData, // Preserve loanData
                         });
                         goToStep(getStepIndex("declaration"));
                       }}
@@ -297,10 +290,53 @@ const PaymentDirectPage = () => {
                           declarationAccepted: true,
                           signatureFilename: sigFilename,
                         });
-                        goToStep(getStepIndex("payment-details"));
+                        // For premium financing, go to repayment schedule preview, otherwise go to payment details
+                        if (isPremiumFinancing && !isInstallment) {
+                          goToStep(getStepIndex("repayment-schedule"));
+                        } else {
+                          goToStep(getStepIndex("payment-details"));
+                        }
                       }}
                       onCancel={() => goToStep(currentStep - 1)}
                     />
+                  ) : (
+                    <div className="text-center py-6 sm:py-8">
+                      <p className="text-muted-foreground text-sm sm:text-base">
+                        {!isVerificationComplete
+                          ? "Please complete Ghana card verification first"
+                          : "Please complete the previous steps first"}
+                      </p>
+                    </div>
+                  ))}
+
+                {/* Repayment Schedule Preview Step (Premium Financing only) */}
+                {currentStep === getStepIndex("repayment-schedule") &&
+                  isPremiumFinancing &&
+                  !isInstallment &&
+                  (isVerificationComplete && isDeclarationAccepted ? (
+                    loanData?.noofInstallments &&
+                    loanData?.loanAmount != null &&
+                    loanData?.totalRepayment != null &&
+                    loanData?.totalPaid != null ? (
+                      <RepaymentSchedulePreviewStep
+                        paymentData={{
+                          initialDeposit: String(loanData.initialDeposit ?? 0),
+                          totalRepayment: String(loanData.totalRepayment ?? 0),
+                          totalPaid: String(loanData.totalPaid ?? 0),
+                          loanAmount: String(loanData.loanAmount ?? 0),
+                          noofInstallments: loanData.noofInstallments ?? 0,
+                          paymentFrequency: loanData.paymentFrequency || "monthly",
+                        }}
+                        onNext={() => goToStep(getStepIndex("payment-details"))}
+                        onCancel={() => goToStep(getStepIndex("declaration"))}
+                      />
+                    ) : (
+                      <div className="text-center py-6 sm:py-8">
+                        <p className="text-muted-foreground text-sm sm:text-base">
+                          Please complete loan calculation to view repayment schedule
+                        </p>
+                      </div>
+                    )
                   ) : (
                     <div className="text-center py-6 sm:py-8">
                       <p className="text-muted-foreground text-sm sm:text-base">
@@ -325,6 +361,10 @@ const PaymentDirectPage = () => {
                         if (details) {
                           setApprovalDetails(details);
                           goToStep(getStepIndex("verify"));
+                          // Reset verification state after successful payment completion
+                          setDirectVerification(
+                            getDefaultPaymentVerificationState("direct")
+                          );
                         }
                       }}
                       onCancel={() => goToStep(currentStep - 1)}

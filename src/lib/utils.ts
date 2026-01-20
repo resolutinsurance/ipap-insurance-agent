@@ -62,15 +62,17 @@ export const formatCurrency = (amount: string | number, currency = "GH₵") => {
 /**
  * Format date to a readable format
  */
-export const formatDate = (dateString: string) => {
+export const formatDate = (dateString: string, withTime = true) => {
   const date = new Date(dateString);
   return date.toLocaleString("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
     year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+    ...(withTime && {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
   });
 };
 
@@ -241,4 +243,64 @@ export const normalizeGhanaCardNumber = (raw: string): string => {
   return rawTrimmed.toUpperCase().startsWith("GHA-")
     ? rawTrimmed.toUpperCase()
     : `GHA-${rawTrimmed.toUpperCase().replace(/^GHA-?/i, "")}`;
+};
+
+// Format date from ISO string to YYYY-MM-DD format
+/**
+ * Get status badge color class based on status value
+ * Color scheme:
+ * - Red: cancelled, rejected, overdue, defaulted
+ * - Yellow: pending
+ * - Blue: in progress, in-progress
+ * - Green: success-related (paid, approved, completed, active, verified, success)
+ */
+export const getStatusColor = (status: string | null | undefined): string => {
+  if (!status) return "bg-gray-100 text-gray-800";
+
+  const normalizedStatus = status.toLowerCase().trim();
+
+  // Red statuses: cancelled, rejected, overdue, defaulted
+  if (
+    normalizedStatus === "cancelled" ||
+    normalizedStatus === "canceled" ||
+    normalizedStatus === "rejected" ||
+    normalizedStatus === "overdue" ||
+    normalizedStatus === "defaulted"
+  ) {
+    return "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400";
+  }
+
+  // Yellow statuses: pending
+  if (normalizedStatus === "pending") {
+    return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
+  }
+
+  // Blue statuses: in progress, in-progress, payment in progress
+  if (
+    normalizedStatus === "in progress" ||
+    normalizedStatus === "in-progress" ||
+    normalizedStatus === "inprogress" ||
+    normalizedStatus === "payment in progress" ||
+    normalizedStatus === "payment-in-progress" ||
+    normalizedStatus === "paymentinprogress" ||
+    normalizedStatus.includes("in progress")
+  ) {
+    return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400";
+  }
+
+  // Green statuses: success-related (paid, approved, completed, active, verified, success)
+  if (
+    normalizedStatus === "paid" ||
+    normalizedStatus === "approved" ||
+    normalizedStatus === "completed" ||
+    normalizedStatus === "active" ||
+    normalizedStatus === "verified" ||
+    normalizedStatus === "success" ||
+    normalizedStatus === "successful"
+  ) {
+    return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
+  }
+
+  // Default gray for unknown statuses
+  return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
 };
