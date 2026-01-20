@@ -1,38 +1,16 @@
-# IPAP - Insurance Products Aggregation Portal
+# IPAP Insurance Agent Portal
 
-> An all-in-one insurance infrastructure platform that enables innovators to quickly design, launch, and scale inclusive insurance solutions. Delivers tailored insurance bundles directly to underserved individuals and informal workers.
+> Agent-facing portal for IPAP that lets insurance agents (especially company agents) find policies, manage customers, and collect premiums (including premium financing “Pay Small Small” flows).
 
-**IPAP** (Insurance Products Aggregation Portal) by **Resolut** is a comprehensive web application that streamlines the insurance ecosystem, connecting customers, agents, and insurance companies through a unified platform.
+This repository is the **Insurance Agent** frontend for **IPAP** by **Resolut**.  
+It is a focused dashboard used by agents and insurance companies’ staff to:
 
-## 🚀 Features
+- Look up and manage customer policies
+- Process premium payments (one‑time and premium financing)
+- View financing schedules and repayment status
+- Work with existing policies issued by partner insurers
 
-### For Customers
-
-- **Policy Management**: Request and manage motor and non-motor insurance policies
-- **Quote Requests**: Get instant quotes for various insurance products
-- **Payment Processing**: Secure payment processing with multiple payment methods (Mobile Money, etc.)
-- **Premium Financing**: Flexible payment schedules and premium financing options
-- **Claims Management**: Submit and track insurance claims
-- **Insurance Bundles**: Create and purchase custom insurance bundles
-- **Referral Program**: Earn rewards through referrals
-- **Marketplace**: Browse and compare insurance products from multiple providers
-
-### For Insurance Companies
-
-- **Quote Management**: Receive and manage quote requests from customers
-- **Policy Administration**: Track and manage all purchased policies
-- **Claims Processing**: Review and process customer claims
-- **Financial Logs**: Comprehensive financial tracking and reporting
-- **Customer Management**: View and manage customer relationships
-- **Risk Type Configuration**: Configure and manage insurance risk types
-
-### For Agents
-
-- **Customer Management**: Manage customer relationships and policies
-- **Quote Assistance**: Help customers with quote requests
-- **Commission Tracking**: Track earnings and commissions
-
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack (Agent App)
 
 - **Framework**: [Next.js 15.2.4](https://nextjs.org/) (App Router)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
@@ -103,22 +81,21 @@ Before you begin, ensure you have the following installed:
 | -------------------------- | ---------------------------- | -------- |
 | `NEXT_PUBLIC_API_BASE_URL` | Base URL for the backend API | Yes      |
 
-## 📁 Project Structure
+## 📁 Project Structure (High Level)
 
 ```
-ipap-v2/
+ipap-insurance-agent/
 ├── src/
 │   ├── app/                    # Next.js App Router pages
 │   │   ├── (auth)/             # Authentication routes
-│   │   ├── (dashboard)/         # Dashboard routes
-│   │   │   ├── (user)/          # Customer/User dashboard
-│   │   │   └── company/         # Insurance company dashboard
+│   │   ├── (dashboard)/        # Agent dashboard routes
+│   │   │   ├── (agent)/        # Agent-specific dashboard (this app)
+│   │   │   └── (user)/         # (Legacy / shared) user-facing routes
 │   │   └── (common)/            # Public/common routes
 │   ├── components/             # React components
 │   │   ├── dashboard/           # Dashboard-specific components
 │   │   ├── quote-payments/     # Payment-related components
 │   │   ├── quote-request/      # Quote request components
-│   │   ├── landing/            # Landing page components
 │   │   └── ui/                 # Reusable UI components
 │   ├── hooks/                  # Custom React hooks
 │   ├── lib/                    # Utilities and configurations
@@ -134,29 +111,52 @@ ipap-v2/
 └── package.json               # Dependencies and scripts
 ```
 
-## 🎯 Key Features Breakdown
+## 🎯 Agent Portal Features
 
-### Insurance Types Supported
+### Agent Workflows
 
-- **Motor Insurance**: Comprehensive and Third-Party coverage
-- **Non-Motor Insurance**:
-  - Fire Insurance
-  - Funeral Insurance
-  - Loyalty Insurance
-  - And more...
+- **Find Existing Policies**
 
-### Payment Methods
+  - Search by Policy ID (loyalty and non‑motor policies)
+  - View core policy and loyalty details
+  - Start payment flows directly from the policy (Pay Small Small, one‑time)
 
-- Mobile Money (MTN, Vodafone, AirtelTigo)
-- Bank transfers
-- Other payment gateways
+- **Premium Financing (Pay Small Small)**
 
-### User Roles
+  - Configure loan terms: duration and payment frequency
+  - Auto‑calculate financing summary via backend (loan amount, total repayment, installments)
+  - Preview repayment schedule (agent side and customer self‑service link)
+  - Process repayments, including next‑installment flows
 
-- **Customer**: End users purchasing insurance
-- **Agent**: Insurance agents managing customers
-- **Insurance Company**: Insurance providers managing policies and quotes
-- **Admin**: System administrators
+- **Customer Self‑Verification**
+
+  - Generate remote links for customers to:
+    - Preview financing details
+    - Verify Ghana Card
+    - Accept declaration & sign
+    - Complete premium‑financing payment
+
+- **Payments**
+  - One‑time and premium‑financing payments
+  - Ghana Card verification requirements enforced in middleware
+  - Payment schedule view for financed policies
+
+### Technical Behaviour (Agent App)
+
+- **Agent‑only access**
+
+  - Middleware enforces:
+    - `userType === AGENT`
+    - Agent has a valid `companyID`
+    - Ghana Card verified (`GhcardNo` + `verified === true`) before accessing protected flows
+
+- **State & Storage**
+  - Payment flow state stored in **sessionStorage** via Jotai (`paymentVerificationAtom`)
+  - State:
+    - Persists across refreshes on the same payment route
+    - Is reset:
+      - After successful payment
+      - When starting a new Pay Small Small flow from Find Policy
 
 ## 🚀 Available Scripts
 
@@ -206,8 +206,8 @@ The application is configured as a PWA with:
 
 - Centralized API client (`src/lib/api.ts`)
 - Service functions in `src/lib/services/`
-- React Query for data fetching
-- Error handling and token refresh
+- React Query (TanStack Query) for data fetching/caching
+- Token refresh and auth handled in `src/hooks/use-auth.ts`
 
 ## 🤝 Contributing
 
