@@ -2,9 +2,9 @@ import {
   AuthResponse,
   DecryptUserResponse,
   LoginCredentials,
-  RefreshTokenRequest,
   User,
 } from "@/lib/interfaces";
+import axios from "axios";
 import Cookies from "js-cookie";
 import api from "../api";
 import {
@@ -90,27 +90,16 @@ export const resendOTP = async (email: string): Promise<AuthResponse> => {
   }
 };
 
-export const refreshAuthToken = async (
-  request: RefreshTokenRequest
-): Promise<AuthResponse> => {
+export const refreshAuthToken = async (): Promise<AuthResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/refreshToken`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(
-        errorData?.message || `Token refresh failed with status: ${response.status}`
-      );
+    const refreshToken = Cookies.get(COOKIE_KEYS.refreshToken) || null;
+    if (!refreshToken) {
+      throw new Error("No refresh token available");
     }
-
-    const data = await response.json();
-    return data;
+    const response = await axios.post(`${API_BASE_URL}/refreshToken`, {
+      refreshToken,
+    });
+    return response.data;
   } catch (error) {
     if (error instanceof Error) {
       throw error;

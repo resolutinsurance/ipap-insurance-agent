@@ -1,7 +1,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 import { API_BASE_URL, COOKIE_KEYS, COOKIE_OPTIONS } from "./constants";
-import { logout } from "./services/auth";
+import { logout, refreshAuthToken } from "./services/auth";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -10,9 +10,8 @@ const api = axios.create({
 });
 
 export const refreshToken = async () => {
-  const refreshToken = Cookies.get(COOKIE_KEYS.refreshToken) || null;
   try {
-    const { data } = await api.post("/refreshToken", { refreshToken });
+    const data = await refreshAuthToken();
     return data;
   } catch (error) {
     console.error("Token refresh failed:", error);
@@ -26,34 +25,17 @@ const storeTokens = (accessToken: string, refreshToken: string) => {
   Cookies.set(COOKIE_KEYS.refreshToken, refreshToken, COOKIE_OPTIONS);
 };
 
-let tokenRefreshInterval: NodeJS.Timeout | null = null;
+// Single-flight refresh: if multiple requests fail at once, only refresh once.
+let refreshInFlight: Promise<Awaited<ReturnType<typeof refreshToken>>> | null = null;
 
-export const startTokenRefreshInterval = () => {
-  if (tokenRefreshInterval) {
-    clearInterval(tokenRefreshInterval);
+async function refreshTokenSingleFlight() {
+  if (!refreshInFlight) {
+    refreshInFlight = refreshToken().finally(() => {
+      refreshInFlight = null;
+    });
   }
-
-  tokenRefreshInterval = setInterval(async () => {
-    try {
-      const refreshData = await refreshToken();
-      if (refreshData?.accessToken && refreshData?.refreshToken) {
-        storeTokens(refreshData.accessToken, refreshData.refreshToken);
-      } else {
-        logout();
-      }
-    } catch (error) {
-      console.error("Failed to refresh token in interval", error);
-      logout();
-    }
-  }, 10 * 60 * 1000); // 10 minutes in milliseconds
-};
-
-export const stopTokenRefreshInterval = () => {
-  if (tokenRefreshInterval) {
-    clearInterval(tokenRefreshInterval);
-    tokenRefreshInterval = null;
-  }
-};
+  return refreshInFlight;
+}
 
 // Request interceptor
 api.interceptors.request.use(
@@ -81,26 +63,20 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        if (
-          Cookies.get(COOKIE_KEYS.accessToken) &&
-          Cookies.get(COOKIE_KEYS.refreshToken)
-        ) {
-          const refreshData = await refreshToken();
-          if (refreshData?.accessToken && refreshData?.refreshToken) {
-            storeTokens(refreshData.accessToken, refreshData.refreshToken);
-
-            originalRequest.headers[
-              "Authorization"
-            ] = `Bearer ${refreshData.accessToken}`;
-            return api(originalRequest);
-          } else {
-            logout();
-            return Promise.reject(error);
-          }
-        } else {
+        if (!Cookies.get(COOKIE_KEYS.refreshToken)) {
           logout();
           return Promise.reject(error);
         }
+
+        const refreshData = await refreshTokenSingleFlight();
+        if (refreshData?.accessToken && refreshData?.refreshToken) {
+          storeTokens(refreshData.accessToken, refreshData.refreshToken);
+          originalRequest.headers["Authorization"] = `Bearer ${refreshData.accessToken}`;
+          return api(originalRequest);
+        }
+
+        logout();
+        return Promise.reject(error);
       } catch (refreshError) {
         console.error("Token refresh failed:", refreshError);
         logout();

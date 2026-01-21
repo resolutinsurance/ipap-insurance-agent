@@ -1,5 +1,4 @@
 import AnalyticsLayout from "@/layouts/analytics-layout";
-import AppLayout from "@/layouts/app-layout";
 import { Providers } from "@/lib/providers";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
@@ -30,15 +29,13 @@ export default async function RootLayout(
           isDashboardRoute ? "overflow-clip" : "overflow-x-clip"
         }`}
       >
-        <AppLayout>
-          <Toaster position="top-right" richColors />
-          <Providers>
-            <AnalyticsLayout>
-              {props.children}
-              {props.modal}
-            </AnalyticsLayout>
-          </Providers>
-        </AppLayout>
+        <Toaster position="top-right" richColors />
+        <Providers>
+          <AnalyticsLayout>
+            {props.children}
+            {props.modal}
+          </AnalyticsLayout>
+        </Providers>
         <Script
           id="tawk-init"
           strategy="afterInteractive"

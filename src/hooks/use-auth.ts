@@ -16,7 +16,6 @@ import {
   getUser,
   loginUser,
   logout,
-  refreshAuthToken,
   requestPasswordReset,
   resendOTP,
   updateUser,
@@ -77,7 +76,6 @@ export const useAuth = () => {
       const userData = data.user;
       Cookies.set(COOKIE_KEYS.user, JSON.stringify(userData), COOKIE_OPTIONS);
 
-      console.log("data", data);
       if (data.refreshToken) {
         Cookies.set(COOKIE_KEYS.refreshToken, data.refreshToken, COOKIE_OPTIONS);
       }
@@ -199,24 +197,6 @@ export const useAuth = () => {
     mutationFn: resendOTP,
     onError: (error) => {
       console.error("OTP resend error:", error);
-    },
-  });
-
-  // Token refresh mutation
-  const refreshUserToken = useMutation({
-    mutationFn: refreshAuthToken,
-    onSuccess: (data) => {
-      // Store tokens in localStorage instead of cookies
-      if (data.refreshToken) {
-        Cookies.set(COOKIE_KEYS.refreshToken, data.refreshToken, COOKIE_OPTIONS);
-      }
-      if (data.accessToken) {
-        Cookies.set(COOKIE_KEYS.accessToken, data.accessToken, COOKIE_OPTIONS);
-      }
-    },
-    onError: (error) => {
-      console.error("Token refresh error:", error);
-      logout();
     },
   });
 
@@ -353,35 +333,6 @@ export const useAuth = () => {
     },
   });
 
-  // Add a function to handle token refresh
-  const handleTokenRefresh = async () => {
-    try {
-      const refreshTokenValue = Cookies.get(COOKIE_KEYS.refreshToken);
-      if (!refreshTokenValue) {
-        throw new Error("No refresh token available");
-      }
-
-      const refreshData = await refreshAuthToken({ refreshToken: refreshTokenValue });
-
-      if (refreshData?.accessToken) {
-        Cookies.set(COOKIE_KEYS.accessToken, refreshData.accessToken, COOKIE_OPTIONS);
-
-        if (refreshData.refreshToken) {
-          Cookies.set(COOKIE_KEYS.refreshToken, refreshData.refreshToken, COOKIE_OPTIONS);
-        }
-
-        return refreshData.accessToken;
-      }
-
-      throw new Error("Failed to refresh token");
-    } catch (error) {
-      console.error("Token refresh failed:", error);
-      // If refresh fails, log out the user
-      // logout();
-      throw error;
-    }
-  };
-
   return {
     user: user || getCurrentUser(),
     userType: getUserType(),
@@ -391,7 +342,6 @@ export const useAuth = () => {
     login,
     decryptUserRefLink,
     resendVerificationOTP,
-    refreshUserToken,
     updateUserProfile,
     getUserProfile,
     logoutUser,
@@ -399,7 +349,6 @@ export const useAuth = () => {
     changeUserPassword,
     requestPasswordResetCode,
     verifyPasswordResetCodeMutation,
-    handleTokenRefresh,
   };
 };
 
