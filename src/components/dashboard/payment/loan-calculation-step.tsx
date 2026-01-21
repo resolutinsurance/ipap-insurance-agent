@@ -18,6 +18,7 @@ interface LoanCalculationStepProps {
   onNext: () => void;
   onCancel: () => void;
   isLoading?: boolean;
+  quoteType: string;
   nextButtonLabel?: string;
   verificationAtom?: WritableAtom<
     PaymentVerificationState,
@@ -31,6 +32,7 @@ export function LoanCalculationStep({
   onNext,
   onCancel,
   isLoading = false,
+  quoteType,
   nextButtonLabel = "Continue to Declaration",
   verificationAtom = paymentVerificationAtom,
 }: LoanCalculationStepProps) {
@@ -96,6 +98,7 @@ export function LoanCalculationStep({
     duration,
     paymentFrequency,
     type: "premium-financing",
+    quoteType: quoteType,
     enabled: true,
   });
 

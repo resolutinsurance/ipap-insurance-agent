@@ -46,6 +46,7 @@ export const ROUTES = {
     CUSTOMER_SELF_VERIFICATION: "/customer/self-verification",
     VERIFY_USER: "/verify-user",
     REQUEST_QUOTE: "/request",
+    REPAYMENT_SCHEDULE: "/repayment-schedule",
   },
 };
 

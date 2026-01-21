@@ -6,7 +6,7 @@ import {
   QuotePaymentRequest,
   QuotePaymentRequestWithPremiumFinancing,
 } from "@/lib/interfaces";
-import { updatePremiumFinancing } from "@/lib/services/premium-financing";
+import { customerUpdatePremiumFinancing } from "@/lib/services/premium-financing";
 import { updateQuotePayment } from "@/lib/services/quote-requests/quote-payments";
 import { customerSelfVerificationAtom } from "@/lib/store";
 import { validateAccountName } from "@/lib/utils/name-validation";
@@ -42,7 +42,7 @@ export function useSubmitCustomerQuotePayment({
 }: UseSubmitCustomerQuotePaymentParams) {
   const [paymentVerification] = useAtom(customerSelfVerificationAtom);
   const { makeQuotePayment } = useQuotePayments();
-  const { purchaseWithPremiumFinancing } = usePurchaseWithPremiumFinancing();
+  const { customerPurchasePremiumFinancing } = usePurchaseWithPremiumFinancing();
   const { generatePDF } = useGeneratePDF();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
@@ -130,7 +130,7 @@ export function useSubmitCustomerQuotePayment({
           }),
         };
 
-        const financingResponse = await purchaseWithPremiumFinancing.mutateAsync(
+        const financingResponse = await customerPurchasePremiumFinancing.mutateAsync(
           financingRequest
         );
 
@@ -153,7 +153,7 @@ export function useSubmitCustomerQuotePayment({
             const formData = new FormData();
             formData.append("declarationDoc", blob, fileName);
 
-            await updatePremiumFinancing(paymentId, formData);
+            await customerUpdatePremiumFinancing(paymentId, formData);
             toast.success("Payment processed and document uploaded successfully");
           } catch (error) {
             console.error("Failed to generate or upload PDF:", error);
@@ -257,7 +257,7 @@ export function useSubmitCustomerQuotePayment({
     installmentDuration,
     installmentPaymentFrequency,
     makeQuotePayment,
-    purchaseWithPremiumFinancing,
+    customerPurchasePremiumFinancing,
     generatePDF,
   ]);
 
@@ -266,6 +266,6 @@ export function useSubmitCustomerQuotePayment({
     isSubmitting:
       isSubmitting ||
       makeQuotePayment.isPending ||
-      purchaseWithPremiumFinancing.isPending,
+      customerPurchasePremiumFinancing.isPending,
   };
 }

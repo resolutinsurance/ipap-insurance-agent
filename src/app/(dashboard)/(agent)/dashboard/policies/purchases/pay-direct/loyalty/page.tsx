@@ -259,6 +259,7 @@ const PaymentDirectPage = () => {
                   (isVerificationComplete ? (
                     <LoanCalculationStep
                       premiumAmount={premiumAmount}
+                      quoteType={quoteType}
                       verificationAtom={loyaltyPaymentVerificationAtom}
                       onNext={async () => {
                         // Get the latest loanData from state before marking as calculated

@@ -153,6 +153,11 @@ export interface MainUserGhanaCardVerificationResponse {
 
 export type PaymentScheduleDetailsResponse = APIResponse<PaymentScheduleDetails>;
 
+export type AgentSetupPremiumFinancingResponse = {
+  premium: PaymentScheduleDetails;
+  encryptedClientLink: string;
+};
+
 export interface PaymentScheduleItem {
   installmentNumber: number;
   paymentAmount: string;

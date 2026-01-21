@@ -177,7 +177,30 @@ const CustomerPremiumFinancingVerificationPage = () => {
                   />
                 )}
 
-                {currentStep === 2 && (
+                {/* Repayment Schedule Preview Step - Now Step 2 */}
+                {currentStep === 2 &&
+                  (financingId ? (
+                    <RepaymentSchedulePreviewStep
+                      paymentData={{
+                        initialDeposit: String(premiumFinancing?.initialDeposit ?? "0"),
+                        totalRepayment: String(premiumFinancing?.totalRepayment ?? "0"),
+                        totalPaid: String(premiumFinancing?.totalPaid ?? "0"),
+                        loanAmount: String(premiumFinancing?.loanAmount ?? "0"),
+                        noofInstallments: Number(premiumFinancing?.noofInstallments ?? 0),
+                        paymentFrequency: premiumFinancing?.paymentFrequency || "monthly",
+                      }}
+                      onNext={() => setCurrentStep(3)}
+                      onCancel={() => setCurrentStep(1)}
+                    />
+                  ) : (
+                    <div className="text-center py-6 sm:py-8">
+                      <p className="text-muted-foreground text-sm sm:text-base">
+                        Premium finance ID is required to view repayment schedule
+                      </p>
+                    </div>
+                  ))}
+
+                {currentStep === 3 && (
                   <GhanaCardVerificationStep
                     userEmail=""
                     userPhone=""
@@ -193,12 +216,12 @@ const CustomerPremiumFinancingVerificationPage = () => {
                         ghanaCardNumber: ghanaCardNumber,
                         ghanaCardResponse: ghanaCardResponse,
                       });
-                      setCurrentStep(3);
+                      setCurrentStep(4);
                     }}
                   />
                 )}
 
-                {currentStep === 3 && (
+                {currentStep === 4 && (
                   <DeclarationForm
                     updateVerificationState={updateVerificationState}
                     initialDeclarations={declarations}
@@ -213,47 +236,11 @@ const CustomerPremiumFinancingVerificationPage = () => {
                         declarationAccepted: true,
                         signatureFilename: sigFilename,
                       });
-                      setCurrentStep(4);
+                      setCurrentStep(5);
                     }}
-                    onCancel={() => setCurrentStep(2)}
+                    onCancel={() => setCurrentStep(3)}
                   />
                 )}
-
-                {/* Repayment Schedule Preview Step */}
-                {currentStep === 4 &&
-                  (isGhanaVerified && isDeclarationAccepted ? (
-                    financingId ? (
-                      <RepaymentSchedulePreviewStep
-                        paymentData={{
-                          initialDeposit: String(premiumFinancing?.initialDeposit ?? "0"),
-                          totalRepayment: String(premiumFinancing?.totalRepayment ?? "0"),
-                          totalPaid: String(premiumFinancing?.totalPaid ?? "0"),
-                          loanAmount: String(premiumFinancing?.loanAmount ?? "0"),
-                          noofInstallments: Number(
-                            premiumFinancing?.noofInstallments ?? 0
-                          ),
-                          paymentFrequency:
-                            premiumFinancing?.paymentFrequency || "monthly",
-                        }}
-                        onNext={() => setCurrentStep(5)}
-                        onCancel={() => setCurrentStep(3)}
-                      />
-                    ) : (
-                      <div className="text-center py-6 sm:py-8">
-                        <p className="text-muted-foreground text-sm sm:text-base">
-                          Premium finance ID is required to view repayment schedule
-                        </p>
-                      </div>
-                    )
-                  ) : (
-                    <div className="text-center py-6 sm:py-8">
-                      <p className="text-muted-foreground text-sm sm:text-base">
-                        {!isGhanaVerified
-                          ? "Please complete Ghana card verification first"
-                          : "Please complete the previous steps first"}
-                      </p>
-                    </div>
-                  ))}
 
                 {currentStep === 5 &&
                   (productTypeParam ? (

@@ -2,6 +2,7 @@
 
 import { RenderDataTable } from "@/components/table";
 import { Button } from "@/components/ui/button";
+import useGeneratePDF from "@/hooks/use-generate-pdf";
 import { useDirectPremiumFinancingSchedule } from "@/hooks/use-premium-financing";
 import { PAYMENT_SCHEDULE_ITEM_COLUMNS } from "@/lib/columns";
 import { PremiumFinancingScheduleRequest } from "@/lib/interfaces";
@@ -19,19 +20,46 @@ export const RepaymentSchedulePreviewStep = ({
   onCancel,
 }: RepaymentSchedulePreviewStepProps) => {
   const { getPremiumFinancingSchedule } = useDirectPremiumFinancingSchedule(paymentData);
+  const { generating: isGeneratingPdf, generateAndDownload } = useGeneratePDF();
 
   const scheduleData = getPremiumFinancingSchedule.data?.message;
   const scheduleItems = scheduleData?.schedule || [];
   const isLoading = getPremiumFinancingSchedule.isLoading;
   const error = getPremiumFinancingSchedule.error;
 
+  const handleDownloadPdf = async () => {
+    try {
+      if (typeof window === "undefined") return;
+      await generateAndDownload(
+        `${window.location.origin}/repayment-schedule`,
+        "repayment-schedule.pdf",
+        paymentData
+      );
+    } catch (e) {
+      console.error("Failed to download repayment schedule PDF", e);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold mb-2">Repayment Schedule Preview</h2>
-        <p className="text-sm text-muted-foreground">
-          Review your repayment schedule before proceeding with payment
-        </p>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-semibold mb-2">Repayment Schedule Preview</h2>
+          <p className="text-sm text-muted-foreground">
+            Review your repayment schedule before proceeding with payment
+          </p>
+        </div>
+        {scheduleData && (
+          <Button
+            variant="outline"
+            type="button"
+            size="sm"
+            onClick={handleDownloadPdf}
+            disabled={isGeneratingPdf}
+          >
+            {isGeneratingPdf ? "Downloading..." : "Download PDF"}
+          </Button>
+        )}
       </div>
 
       {error && (
@@ -60,7 +88,9 @@ export const RepaymentSchedulePreviewStep = ({
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Repayment</p>
-              <p className="text-lg font-semibold">{scheduleData.totalRepayment}</p>
+              <p className="text-lg font-semibold">
+                {formatCurrencyToGHS(scheduleData.totalRepayment)}
+              </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Payment Frequency</p>
@@ -80,7 +110,6 @@ export const RepaymentSchedulePreviewStep = ({
               columns={PAYMENT_SCHEDULE_ITEM_COLUMNS}
               title="Payment Schedule"
               isLoading={isLoading}
-              showExportAction={false}
               showPagination={false}
               hideTitle={true}
               showColumnsFilter={false}

@@ -11,6 +11,7 @@ import {
 import {
   calculatePremiumFinancingData,
   confirmAutoDebitOTP,
+  customerPurchasePremiumFinancing,
   decryptPremiumFinancingId,
   getDirectPremiumFinancingSchedule,
   getPolicyDetails,
@@ -39,6 +40,17 @@ export const usePurchaseWithPremiumFinancing = () => {
       console.error("Payment error:", error);
     },
   });
+
+  const customerPurchasePremiumFinancingMutation = useMutation({
+    mutationFn: (data: QuotePaymentRequestWithPremiumFinancing) =>
+      customerPurchasePremiumFinancing(data),
+    onSuccess: (data) => {
+      console.log("Payment made successfully:", data);
+    },
+    onError: (error) => {
+      console.error("Payment error:", error);
+    },
+  });
   const purchaseBundleWithPremiumFinancingMutation = useMutation({
     mutationFn: (data: BundlePaymentRequestWithPremiumFinancing) =>
       purchaseBundleWithPremiumFinancing(data),
@@ -51,6 +63,7 @@ export const usePurchaseWithPremiumFinancing = () => {
   });
   return {
     purchaseWithPremiumFinancing: purchaseWithPremiumFinancingMutation,
+    customerPurchasePremiumFinancing: customerPurchasePremiumFinancingMutation,
     purchaseBundleWithPremiumFinancing: purchaseBundleWithPremiumFinancingMutation,
   };
 };
@@ -202,6 +215,7 @@ interface UseAutoCalculatePremiumFinancingParams {
   duration: number;
   paymentFrequency: string;
   type?: "one-time" | "premium-financing";
+  quoteType: string;
   enabled?: boolean;
 }
 
@@ -211,6 +225,7 @@ export const useAutoCalculatePremiumFinancing = ({
   duration,
   paymentFrequency,
   type = "one-time",
+  quoteType,
   enabled = true,
 }: UseAutoCalculatePremiumFinancingParams) => {
   const { calculatePremiumFinancingData } = useCalculatePremiumFinancingData();
@@ -276,6 +291,7 @@ export const useAutoCalculatePremiumFinancing = ({
         initialDeposit,
         duration: convertedDuration,
         paymentFrequency: paymentFrequency.trim(),
+        quoteType: quoteType,
       });
     }, 500); // Debounce to avoid excessive API calls
 
@@ -460,7 +476,6 @@ export const useDirectPremiumFinancingSchedule = (paymentData?: {
   noofInstallments: number;
   paymentFrequency: "daily" | "weekly" | "monthly";
 }) => {
-  const { isAuthenticated } = useAuth();
   const premiumFinancingScheduleQuery = useQuery({
     queryKey: ["get-direct-premium-financing-schedule", paymentData],
     queryFn: async () => {
@@ -473,10 +488,7 @@ export const useDirectPremiumFinancingSchedule = (paymentData?: {
       }
       return response;
     },
-    enabled:
-      isAuthenticated &&
-      !!paymentData?.paymentFrequency &&
-      !!paymentData.noofInstallments,
+    enabled: !!paymentData?.paymentFrequency && !!paymentData.noofInstallments,
   });
 
   return {

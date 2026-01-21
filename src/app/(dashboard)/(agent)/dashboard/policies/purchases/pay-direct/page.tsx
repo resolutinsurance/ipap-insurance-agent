@@ -253,6 +253,7 @@ const PaymentDirectPage = () => {
                   (isVerificationComplete ? (
                     <LoanCalculationStep
                       premiumAmount={premiumAmount}
+                      quoteType={quoteType}
                       verificationAtom={directPaymentVerificationAtom}
                       onNext={async () => {
                         // LoanCalculationStep already persists the full loanData (including summary fields)

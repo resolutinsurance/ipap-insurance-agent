@@ -23,6 +23,7 @@ import { useState } from "react";
 export const LoyaltyFetchPolicyDetails = () => {
   const router = useRouter();
   const [policyId, setPolicyId] = useState("");
+  const [inputError, setInputError] = useState<string | null>(null);
   const [showFlowDecider, setShowFlowDecider] = useState(false);
   const [standardFlowUrl, setStandardFlowUrl] = useState<string | null>(null);
   const { user } = useAuth();
@@ -40,11 +41,29 @@ export const LoyaltyFetchPolicyDetails = () => {
   const loyaltyPolicyData = policyInfoData?.message?.loyaltyPolicy;
 
   const handleFetchPolicy = async () => {
-    if (!policyId || !agent?.id || policyId?.length < 5) {
+    if (!policyId || !agent?.id) {
+      return;
+    }
+    const value = policyId.trim();
+    setInputError(null);
+
+    // Debit note format: e.g. DN-0HQ-202601006
+    const isDebitNote = /^DN-[A-Z0-9-]+$/i.test(value);
+    const isNumericPolicyId = /^\d+$/.test(value);
+
+    if (isDebitNote) {
+      await fetchPolicyInfo({ debit_note_no: value });
       return;
     }
 
-    await fetchPolicyInfo(policyId);
+    if (isNumericPolicyId) {
+      await fetchPolicyInfo({ policy_id: Number(value) });
+      return;
+    }
+
+    setInputError(
+      "Enter a numeric Policy ID (e.g. 163719) or a Debit Note (e.g. DN-0HQ-202601006)."
+    );
   };
 
   const renderPaymentActions = () => {
@@ -143,7 +162,6 @@ export const LoyaltyFetchPolicyDetails = () => {
         <div className="flex-1">
           <p className="text-sm text-muted-foreground mb-1">Enter Policy ID</p>
           <Input
-            type="number"
             value={policyId}
             onChange={(e) => setPolicyId(e.target.value)}
             placeholder="e.g. 163633"
@@ -159,6 +177,8 @@ export const LoyaltyFetchPolicyDetails = () => {
           {(policyInfoError as Error)?.message || "Failed to fetch policy information"}
         </p>
       )}
+
+      {inputError && <p className="text-sm text-red-500">{inputError}</p>}
 
       {policyInfoData && (
         <>

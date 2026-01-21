@@ -669,6 +669,7 @@ export interface PremiumFinancingCalculateDataRequest {
   initialDeposit: number;
   duration: number;
   paymentFrequency: string;
+  quoteType: string;
 }
 
 export interface PremiumFinancingCalculateDataResponse {
@@ -676,6 +677,7 @@ export interface PremiumFinancingCalculateDataResponse {
   initialDeposit: number;
   minimumInitialDeposit: number;
   loanAmount: number;
+  quoteType: string;
   interestRate: number;
   interestRatePercent: string;
   interestPerInstallment: number;

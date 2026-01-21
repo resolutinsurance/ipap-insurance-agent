@@ -2,7 +2,8 @@ import api from "../api";
 import { LoyaltyPolicyInfoResponse } from "../interfaces/response";
 
 export interface FetchPolicyInfoPayload {
-  policy_id: number;
+  policy_id?: number;
+  debit_note_no?: string;
   userAgentID: string;
 }
 

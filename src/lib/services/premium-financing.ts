@@ -11,9 +11,11 @@ import {
   ResendOTPRequest,
   SetupPremiumFinancingRequest,
 } from "@/lib/interfaces";
+import axios from "axios";
 import api from "../api";
 import { DEFAULT_PAGE_SIZE } from "../constants";
 import {
+  AgentSetupPremiumFinancingResponse,
   APIResponse,
   BundleResponse,
   PaymentScheduleDetailsResponse,
@@ -83,6 +85,19 @@ export const purchaseWithPremiumFinancing = async (
   try {
     // Send as JSON (signature is now a filename string, not a File)
     const response = await api.post("/PremiumFinancing", data);
+    return response.data.message;
+  } catch (error) {
+    console.error("MAKE PAYMENT ERROR:", error);
+    throw new Error(`Failed to make payment: ${error}`);
+  }
+};
+
+export const customerPurchasePremiumFinancing = async (
+  data: QuotePaymentRequestWithPremiumFinancing
+) => {
+  try {
+    // Send as JSON (signature is now a filename string, not a File)
+    const response = await api.post("/PremiumFinancing/remote-verification", data);
     return response.data.message;
   } catch (error) {
     console.error("MAKE PAYMENT ERROR:", error);
@@ -167,6 +182,26 @@ export const updatePremiumFinancing = async (
   }
 };
 
+export const customerUpdatePremiumFinancing = async (
+  id: string,
+  data: FormData
+): Promise<PaymentSchedule> => {
+  try {
+    const response = await axios.put(
+      `${process.env.NEXT_PUBLIC_API_URL}/PremiumFinancing/remote-verification/${id}`,
+      data,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+    return response.data.message;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error("Network error. Please check your connection and try again.");
+  }
+};
 /**
  * Confirm OTP for Premium Financing Auto Debit
  */
@@ -241,9 +276,9 @@ export const decryptPremiumFinancingId = async (
  */
 export const setupPremiumFinancing = async (
   data: SetupPremiumFinancingRequest
-): Promise<PaymentSchedule> => {
+): Promise<AgentSetupPremiumFinancingResponse> => {
   try {
-    const response = await api.post<APIResponse<PaymentSchedule>>(
+    const response = await api.post<APIResponse<AgentSetupPremiumFinancingResponse>>(
       "/PremiumFinancing/setup",
       data
     );

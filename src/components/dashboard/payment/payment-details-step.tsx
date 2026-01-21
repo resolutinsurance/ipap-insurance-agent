@@ -232,6 +232,7 @@ export function PaymentDetailsStep({
     duration: loanData?.duration || 12,
     paymentFrequency: loanData?.paymentFrequency || "monthly",
     type: "premium-financing",
+    quoteType: quoteType,
     enabled: type === "premium-financing" && !!loanData,
   });
 

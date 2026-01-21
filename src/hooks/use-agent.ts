@@ -302,14 +302,32 @@ export const useSingleCustomer = (customerId: string) => {
 
 export const usePolicyInfo = (policyId: number | string, enabled: boolean = true) => {
   const { agent } = useAgent();
+
+  // Detect if it's a debit note or policy ID
+  const value = String(policyId).trim();
+  const isDebitNote = /^DN-[A-Z0-9-]+$/i.test(value);
+  const isNumericPolicyId = /^\d+$/.test(value);
+
   const fetchPolicyInfoQuery = useQuery({
     queryKey: ["fetch-policy-info", policyId, agent?.id],
-    queryFn: () =>
-      fetchPolicyInfoService({
-        policy_id: Number(policyId),
+    queryFn: () => {
+      const payload: {
+        policy_id?: number;
+        debit_note_no?: string;
+        userAgentID: string;
+      } = {
         userAgentID: agent?.id ?? "",
-      }),
-    enabled: enabled && !!policyId && !!agent?.id,
+      };
+
+      if (isDebitNote) {
+        payload.debit_note_no = value;
+      } else if (isNumericPolicyId) {
+        payload.policy_id = Number(value);
+      }
+
+      return fetchPolicyInfoService(payload);
+    },
+    enabled: enabled && !!policyId && !!agent?.id && (isDebitNote || isNumericPolicyId),
   });
 
   return {
@@ -320,8 +338,11 @@ export const usePolicyInfo = (policyId: number | string, enabled: boolean = true
 export const usePolicyInfoMutation = () => {
   const { agent } = useAgent();
   const fetchPolicyInfoMutation = useMutation({
-    mutationFn: (payload: { policy_id: number; userAgentID: string }) =>
-      fetchPolicyInfoService(payload),
+    mutationFn: (payload: {
+      policy_id?: number;
+      debit_note_no?: string;
+      userAgentID: string;
+    }) => fetchPolicyInfoService(payload),
   });
 
   return {
@@ -330,21 +351,21 @@ export const usePolicyInfoMutation = () => {
     error: fetchPolicyInfoMutation.error,
     isPending: fetchPolicyInfoMutation.isPending,
     isLoading: fetchPolicyInfoMutation.isPending,
-    mutate: (policyId: number | string) => {
+    mutate: (payload: { policy_id?: number; debit_note_no?: string }) => {
       if (!agent?.id) {
         return;
       }
       return fetchPolicyInfoMutation.mutate({
-        policy_id: Number(policyId),
+        ...payload,
         userAgentID: agent.id,
       });
     },
-    mutateAsync: async (policyId: number | string) => {
+    mutateAsync: async (payload: { policy_id?: number; debit_note_no?: string }) => {
       if (!agent?.id) {
         throw new Error("Agent ID is required");
       }
       return fetchPolicyInfoMutation.mutateAsync({
-        policy_id: Number(policyId),
+        ...payload,
         userAgentID: agent.id,
       });
     },

@@ -1,49 +1,44 @@
-import { COOKIE_KEYS } from "@/lib/constants";
+import { downloadBlob, generateFilenameWithDate } from "@/lib/utils/download";
 import { useMutation } from "@tanstack/react-query";
-import Cookies from "js-cookie";
 
 /**
- * Hook for generating PDF blobs (without downloading)
- * Similar to usePagePDFExport but returns the blob instead of triggering download
+ * Encode data as base64 for URL
+ */
+function encodeData(data: unknown): string {
+  return Buffer.from(JSON.stringify(data)).toString("base64");
+}
+
+type GeneratePDFOptions = {
+  /** Base URL to the preview page */
+  url: string;
+  /** Data to pass to the preview page (encoded as base64 in URL) */
+  params?: unknown;
+  /** Authorization token for authenticated preview pages */
+  authorization?: string;
+};
+
+/**
+ * Hook for generating PDF with flexible options
  */
 export default function useGeneratePDF() {
   const { isPending, mutateAsync } = useMutation({
-    mutationFn: async (data: {
-      /** Full url to the page to be exported as PDF. */
-      url: string;
-      /** Optional query parameters to add to the URL */
-      params?: Record<string, string>;
-    }) => {
-      // Get the current access token from cookies
-      const cookieName = COOKIE_KEYS.accessToken;
-      const accessToken: string | undefined = cookieName
-        ? Cookies.get(cookieName)
-        : undefined;
+    mutationFn: async (options: GeneratePDFOptions) => {
+      const urlObj = new URL(options.url);
 
-      console.log("accessToken", accessToken);
-
-      // Add authorization query parameter to the URL if token exists
-      let urlWithAuth = data.url;
-      if (accessToken) {
-        const urlObj = new URL(data.url);
-        urlObj.searchParams.set("authorization", accessToken);
-        urlWithAuth = urlObj.toString();
+      // Encode data in URL if provided
+      if (options.params !== undefined) {
+        urlObj.searchParams.set("data", encodeData(options.params));
       }
 
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-      if (accessToken) {
-        headers.Authorization = `Bearer ${accessToken}`;
+      // Add authorization token if provided
+      if (options.authorization) {
+        urlObj.searchParams.set("authorization", options.authorization);
       }
 
       const response = await fetch("/api/generate-pdf", {
         method: "POST",
-        headers,
-        body: JSON.stringify({
-          url: urlWithAuth,
-          params: data.params,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: urlObj.toString() }),
       });
 
       if (!response.ok) {
@@ -53,14 +48,35 @@ export default function useGeneratePDF() {
         throw new Error(error.error || "Failed to generate PDF");
       }
 
-      const blob = await response.blob();
-      return blob as Blob;
+      return response.blob();
     },
   });
 
   /**
+   * Generate PDF and download it (with data encoded in URL)
+   */
+  async function generateAndDownload(
+    url: string,
+    filename: string,
+    data: unknown
+  ): Promise<void> {
+    const blob = await mutateAsync({ url, params: data });
+    downloadBlob(blob, filename);
+  }
+
+  /**
+   * Generate PDF with full options and download it
+   */
+  async function generateWithOptions(
+    options: GeneratePDFOptions & { filename: string }
+  ): Promise<void> {
+    const { filename, ...pdfOptions } = options;
+    const blob = await mutateAsync(pdfOptions);
+    downloadBlob(blob, filename);
+  }
+
+  /**
    * Convert Blob to File object for FormData upload
-   * Automatically truncates filename to 100 characters max
    */
   function blobToFile(blob: Blob, filename: string): File {
     return new File([blob], filename, { type: "application/pdf" });
@@ -69,6 +85,10 @@ export default function useGeneratePDF() {
   return {
     generating: isPending,
     generatePDF: mutateAsync,
+    generateAndDownload,
+    generateWithOptions,
     blobToFile,
+    downloadBlob,
+    generateFilenameWithDate,
   };
 }

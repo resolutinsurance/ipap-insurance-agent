@@ -9,6 +9,40 @@ const api = axios.create({
   // withCredentials: true,
 });
 
+// API route patterns that should skip logout when they fail
+// These are typically session/analytics endpoints or public endpoints
+const SKIP_LOGOUT_ROUTE_PATTERNS = [
+  "/Sesssions", // Session endpoints (analytics/tracking)
+  "/SessionEvent", // Session event endpoints
+  "/auth/login", // Login endpoint (handles its own errors)
+  "/auth/register", // Registration endpoint
+  "/public", // Public endpoints
+  "/PremiumFinancing/remote-verification",
+  "/PremiumFinancing/verifyPaymentTransaction",
+];
+
+// Helper function to check if a URL should skip logout
+const shouldSkipLogout = (url: string | undefined): boolean => {
+  if (!url) return false;
+
+  // Get the path from URL (handle both absolute and relative URLs)
+  let path = url;
+  if (API_BASE_URL && url.startsWith(API_BASE_URL)) {
+    path = url.replace(API_BASE_URL, "");
+  } else if (url.startsWith("http")) {
+    // If it's an absolute URL, extract the pathname
+    try {
+      const urlObj = new URL(url);
+      path = urlObj.pathname;
+    } catch {
+      // If URL parsing fails, use the original url
+      path = url;
+    }
+  }
+
+  return SKIP_LOGOUT_ROUTE_PATTERNS.some((pattern) => path.startsWith(pattern));
+};
+
 export const refreshToken = async () => {
   try {
     const data = await refreshAuthToken();
@@ -62,9 +96,14 @@ api.interceptors.response.use(
     if (isTokenExpiredError && !originalRequest._retry) {
       originalRequest._retry = true;
 
+      // Check if this route should skip logout
+      const skipLogout = shouldSkipLogout(originalRequest.url);
+
       try {
         if (!Cookies.get(COOKIE_KEYS.refreshToken)) {
-          logout();
+          if (!skipLogout) {
+            logout();
+          }
           return Promise.reject(error);
         }
 
@@ -75,11 +114,15 @@ api.interceptors.response.use(
           return api(originalRequest);
         }
 
-        logout();
+        if (!skipLogout) {
+          logout();
+        }
         return Promise.reject(error);
       } catch (refreshError) {
         console.error("Token refresh failed:", refreshError);
-        logout();
+        if (!skipLogout) {
+          logout();
+        }
         return Promise.reject(refreshError);
       }
     }

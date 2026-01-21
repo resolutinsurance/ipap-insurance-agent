@@ -2,6 +2,7 @@
 
 import { CustomerVerificationLinkStep } from "@/components/dashboard/agent/customer-verification-link-step";
 import { LoanCalculationStep } from "@/components/dashboard/payment/loan-calculation-step";
+import { RepaymentSchedulePreviewStep } from "@/components/dashboard/payment/repayment-schedule-preview-step";
 import { Card, CardContent } from "@/components/ui/card";
 import { Stepper, type Step } from "@/components/ui/stepper";
 import WidthConstraint from "@/components/ui/width-constraint";
@@ -18,6 +19,7 @@ import { convertDurationForPaymentFrequency } from "@/lib/utils/payments";
 import { useAtom } from "jotai";
 import { useSearchParams } from "next/navigation";
 import React from "react";
+import { toast } from "sonner";
 
 const AgentRemotePremiumFinancingPage = () => {
   const searchParams = useSearchParams();
@@ -25,8 +27,9 @@ const AgentRemotePremiumFinancingPage = () => {
   const { setupPremiumFinancing } = useSetupPremiumFinancing();
   const { agent } = useAgent();
 
-  const [currentStep, setCurrentStep] = React.useState<1 | 2>(1);
+  const [currentStep, setCurrentStep] = React.useState<1 | 2 | 3>(1);
   const [linkSent, setLinkSent] = React.useState(false);
+  const [clientLink, setClientLink] = React.useState<string | null>(null);
 
   const requestId = searchParams.get("requestId");
   const companyId = searchParams.get("companyId") || "";
@@ -55,12 +58,15 @@ const AgentRemotePremiumFinancingPage = () => {
   const handleGenerateLink = async () => {
     const loanData = paymentVerification.loanData;
     if (!agent) {
+      toast.error("Agent not found. Please try again.");
       console.warn("Agent not found");
       return;
     }
 
     if (!loanData) {
+      toast.error("Loan data is missing. Please complete the loan calculation step.");
       console.warn("Loan data missing when trying to set up premium financing");
+      return;
     }
 
     const finalDuration = loanData?.duration ?? 0;
@@ -73,7 +79,7 @@ const AgentRemotePremiumFinancingPage = () => {
     );
 
     try {
-      await setupPremiumFinancing.mutateAsync({
+      const response = await setupPremiumFinancing.mutateAsync({
         premiumAmount: premiumAmount,
         initialDeposit: loanData?.initialDeposit ?? 0,
         duration: convertedDuration,
@@ -85,9 +91,18 @@ const AgentRemotePremiumFinancingPage = () => {
         entityid: requestId,
       });
 
+      if (response.encryptedClientLink) {
+        setClientLink(response.encryptedClientLink);
+      }
       // Link is sent directly to customer's email/SMS by the backend
       setLinkSent(true);
+      toast.success("Verification link sent successfully to the customer!");
     } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to generate verification link. Please try again.";
+      toast.error(errorMessage);
       console.error("Failed to set up premium financing for remote verification", error);
     }
   };
@@ -107,17 +122,51 @@ const AgentRemotePremiumFinancingPage = () => {
               {currentStep === 1 && (
                 <LoanCalculationStep
                   premiumAmount={premiumAmount}
+                  quoteType={transformProductTypeToQuoteType(productType)}
                   onNext={() => setCurrentStep(2)}
                   onCancel={() => window.history.back()}
                   nextButtonLabel="Proceed to next"
                 />
               )}
 
-              {currentStep === 2 && (
+              {currentStep === 2 &&
+                (paymentVerification.loanData?.noofInstallments &&
+                paymentVerification.loanData?.loanAmount != null &&
+                paymentVerification.loanData?.totalRepayment != null &&
+                paymentVerification.loanData?.totalPaid != null ? (
+                  <RepaymentSchedulePreviewStep
+                    paymentData={{
+                      initialDeposit: String(
+                        paymentVerification.loanData?.initialDeposit ?? 0
+                      ),
+                      totalRepayment: String(
+                        paymentVerification.loanData?.totalRepayment ?? 0
+                      ),
+                      totalPaid: String(paymentVerification.loanData?.totalPaid ?? 0),
+                      loanAmount: String(paymentVerification.loanData?.loanAmount ?? 0),
+                      noofInstallments: Number(
+                        paymentVerification.loanData?.noofInstallments ?? 0
+                      ),
+                      paymentFrequency:
+                        paymentVerification.loanData?.paymentFrequency || "monthly",
+                    }}
+                    onNext={() => setCurrentStep(3)}
+                    onCancel={() => setCurrentStep(1)}
+                  />
+                ) : (
+                  <div className="text-center py-6 sm:py-8">
+                    <p className="text-muted-foreground text-sm sm:text-base">
+                      Please complete loan calculation to view repayment schedule
+                    </p>
+                  </div>
+                ))}
+
+              {currentStep === 3 && (
                 <CustomerVerificationLinkStep
                   linkSent={linkSent}
                   onGenerateLink={handleGenerateLink}
-                  onCancel={() => window.history.back()}
+                  onCancel={() => setCurrentStep(2)}
+                  clientLink={clientLink}
                   isGenerating={setupPremiumFinancing.isPending}
                 />
               )}
