@@ -1,11 +1,4 @@
-import {
-  FileTextIcon,
-  HelpCircleIcon,
-  HomeIcon,
-  SearchIcon,
-  UserIcon,
-  UsersIcon,
-} from "lucide-react";
+import { FileTextIcon, HomeIcon, SearchIcon, UserIcon, UsersIcon } from "lucide-react";
 import { ROUTES, USER_TYPES, UserType } from ".";
 import { NavSection } from "../interfaces";
 
@@ -65,11 +58,6 @@ export const USER_TYPE_TO_NAVIGATION_MAP: Record<UserType, NavSection[]> = {
           label: "User Profile",
           icon: UserIcon,
           href: ROUTES.AGENT.PROFILE.USER,
-        },
-        {
-          label: "Support",
-          icon: HelpCircleIcon,
-          href: ROUTES.AGENT.PROFILE.SUPPORT,
         },
         {
           label: "Terms and Conditions",

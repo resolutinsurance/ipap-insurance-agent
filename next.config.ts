@@ -38,12 +38,12 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value: `
-                  default-src 'self' https://jelly.resolutfinance.com https://*.resolutfinance.com;
+                  default-src 'self' https://jelly.resolutfinance.com https://*.resolutfinance.com https://embed.tawk.to https://*.tawk.to;
                   img-src 'self' blob: data: https:;
-                  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://jelly.resolutfinance.com https://*.resolutfinance.com;
-                  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-                  font-src 'self' https://fonts.gstatic.com data:;
-                  connect-src 'self' https://jelly.resolutfinance.com https://*.resolutfinance.com https:;
+                  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://jelly.resolutfinance.com https://*.resolutfinance.com https://*.wave.resolutfinance.com https://embed.tawk.to https://*.tawk.to https://cdn.jsdelivr.net https://*.jsdelivr.net;
+                  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://embed.tawk.to https://*.tawk.to;
+                  font-src 'self' https://fonts.gstatic.com https://embed.tawk.to https://*.tawk.to data:;
+                  connect-src 'self' https://jelly.resolutfinance.com https://*.resolutfinance.com https://*.wave.resolutfinance.com https://embed.tawk.to https://*.tawk.to wss://vsa21.tawk.to wss://*.tawk.to https:;
                   frame-ancestors 'none';
                   form-action 'self';
                   base-uri 'self';
