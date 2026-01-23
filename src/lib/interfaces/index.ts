@@ -640,6 +640,11 @@ export interface QuotePaymentRequestWithPremiumFinancing {
   GhanaCardId?: string;
 }
 
+export type CustomerPaymentRequestWithPremiumFinancing =
+  QuotePaymentRequestWithPremiumFinancing & {
+    fromAgent: boolean;
+  };
+
 export interface BundlePaymentRequestWithPremiumFinancing {
   id?: string;
   premiumAmount: number;
@@ -718,6 +723,7 @@ export interface SetupPremiumFinancingRequest {
   companyID: string;
   userAgentID: string;
   entityid: string;
+  fromAgent: boolean;
 }
 
 export interface BundleRewardItem {

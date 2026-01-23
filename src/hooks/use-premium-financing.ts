@@ -1,6 +1,7 @@
 import {
   BundlePaymentRequestWithPremiumFinancing,
   ConfirmAutoDebitOTPRequest,
+  CustomerPaymentRequestWithPremiumFinancing,
   DecryptPremiumFinancingRequest,
   PaymentRecord,
   PremiumFinancingCalculateDataRequest,
@@ -42,7 +43,7 @@ export const usePurchaseWithPremiumFinancing = () => {
   });
 
   const customerPurchasePremiumFinancingMutation = useMutation({
-    mutationFn: (data: QuotePaymentRequestWithPremiumFinancing) =>
+    mutationFn: (data: CustomerPaymentRequestWithPremiumFinancing) =>
       customerPurchasePremiumFinancing(data),
     onSuccess: (data) => {
       console.log("Payment made successfully:", data);

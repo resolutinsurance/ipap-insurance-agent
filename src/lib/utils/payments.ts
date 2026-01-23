@@ -1,3 +1,5 @@
+import { MAIN_PRODUCT_QUOTE_TYPES } from "../constants";
+
 export function parsePremiumAmount(amount: string | number): number {
   if (typeof amount === "number") return amount;
   // Remove all non-digit, non-dot characters
@@ -32,3 +34,22 @@ export function convertDurationForPaymentFrequency(
       return durationInMonths;
   }
 }
+
+export const calculateProcessingFee = (
+  initialDeposit: number,
+  premiumAmount: number,
+  quoteType: string
+): number => {
+  const FEE = 0.02;
+  const STICKY_FEE = 52;
+
+  let processingFee = 0;
+
+  if (quoteType === MAIN_PRODUCT_QUOTE_TYPES.THIRDPARTY) {
+    const loanAmount = premiumAmount - initialDeposit;
+    processingFee = (loanAmount + STICKY_FEE) * FEE;
+  } else {
+    processingFee = (premiumAmount - initialDeposit) * FEE;
+  }
+  return parseFloat(processingFee.toFixed(2));
+};

@@ -89,6 +89,7 @@ const AgentRemotePremiumFinancingPage = () => {
         userAgentID: agent?.id,
         companyID: companyId,
         entityid: requestId,
+        fromAgent: true,
       });
 
       if (response.encryptedClientLink) {

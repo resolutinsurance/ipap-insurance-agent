@@ -2,6 +2,7 @@ import {
   ApiError,
   BundlePaymentRequestWithPremiumFinancing,
   ConfirmAutoDebitOTPRequest,
+  CustomerPaymentRequestWithPremiumFinancing,
   DecryptPremiumFinancingRequest,
   DecryptPremiumFinancingResponse,
   PaymentSchedule,
@@ -93,7 +94,7 @@ export const purchaseWithPremiumFinancing = async (
 };
 
 export const customerPurchasePremiumFinancing = async (
-  data: QuotePaymentRequestWithPremiumFinancing
+  data: CustomerPaymentRequestWithPremiumFinancing
 ) => {
   try {
     // Send as JSON (signature is now a filename string, not a File)

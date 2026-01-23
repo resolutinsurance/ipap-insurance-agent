@@ -3,8 +3,8 @@ import { usePurchaseWithPremiumFinancing } from "@/hooks/use-premium-financing";
 import { useQuotePayments } from "@/hooks/use-quote-payments";
 import { MOBILE_MONEY_METHODS, MainProductQuoteType } from "@/lib/constants";
 import {
+  CustomerPaymentRequestWithPremiumFinancing,
   QuotePaymentRequest,
-  QuotePaymentRequestWithPremiumFinancing,
 } from "@/lib/interfaces";
 import { customerUpdatePremiumFinancing } from "@/lib/services/premium-financing";
 import { updateQuotePayment } from "@/lib/services/quote-requests/quote-payments";
@@ -107,7 +107,7 @@ export function useSubmitCustomerQuotePayment({
             : loanData.paymentFrequency;
 
         // Use premium financing endpoint
-        const financingRequest: QuotePaymentRequestWithPremiumFinancing = {
+        const financingRequest: CustomerPaymentRequestWithPremiumFinancing = {
           id: pfId,
           premiumAmount: parsedPremiumAmount,
           method: paymentData.method,
@@ -124,10 +124,10 @@ export function useSubmitCustomerQuotePayment({
           currentDeposit: loanData.initialDeposit,
           paymentFrequency: finalPaymentFrequency.trim(),
           duration: finalDuration,
+          GhanaCardId: paymentVerification.ghanaCardId,
+          fromAgent: true,
           ...(signatureFilename && { signature: signatureFilename }),
-          ...(paymentVerification.ghanaCardId && {
-            GhanaCardId: paymentVerification.ghanaCardId,
-          }),
+          ...(paymentVerification.ghanaCardId && {}),
         };
 
         const financingResponse = await customerPurchasePremiumFinancing.mutateAsync(

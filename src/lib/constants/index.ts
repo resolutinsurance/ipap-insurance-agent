@@ -224,6 +224,16 @@ export type MainProductQuoteType =
   | "BuyFireCommercial"
   | "BuyMoneyInsurance";
 
+export const MAIN_PRODUCT_QUOTE_TYPES = {
+  COMPREHENSIVE: "Comprehensive",
+  THIRDPARTY: "Third Party",
+  FIRE: "FIREINSURANCE",
+  ASSETALLRISKS: "AssetAllRisks",
+  GOODSINTRANSIT: "GoodsInTransit",
+  BUYFIRECOMMERCIAL: "BuyFireCommercial",
+  BUYMONEYINSURANCE: "BuyMoneyInsurance",
+};
+
 // Hashmaps for utility functions
 export const USER_TYPE_TO_SIDEBAR_TITLE_MAP: Record<UserType, string> = {
   [USER_TYPES.CUSTOMER]: "IPAP Customer",
