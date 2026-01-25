@@ -7,55 +7,55 @@ interface PremiumFinancingSummaryProps {
   enabled?: boolean;
 }
 
-/**
- * Determines the processing fee percentage based on premium amount
- * Handles formats:
- * - "GHS X" - means 0 to X
- * - "Above GHS X" - means greater than X
- * - "GHS X - GHS Y" - means X to Y (legacy format)
- *
- * Default is 2% if no matching range found
- */
-function getProcessingFeePercentage(
-  premiumAmount: number,
-  processingFees: { loanAmountRange: string; feePercentage: string }[]
-): string {
-  if (!processingFees || processingFees.length === 0) {
-    return "2%";
-  }
+// /**
+//  * Determines the processing fee percentage based on premium amount
+//  * Handles formats:
+//  * - "GHS X" - means 0 to X
+//  * - "Above GHS X" - means greater than X
+//  * - "GHS X - GHS Y" - means X to Y (legacy format)
+//  *
+//  * Default is 2% if no matching range found
+//  */
+// function getProcessingFeePercentage(
+//   premiumAmount: number,
+//   processingFees: { loanAmountRange: string; feePercentage: string }[]
+// ): string {
+//   if (!processingFees || processingFees.length === 0) {
+//     return "2%";
+//   }
 
-  // Check each fee range to find the matching one
-  for (const fee of processingFees) {
-    const range = fee.loanAmountRange;
+//   // Check each fee range to find the matching one
+//   for (const fee of processingFees) {
+//     const range = fee.loanAmountRange;
 
-    if (range.includes("Above")) {
-      // Format: "Above GHS X" - means greater than X
-      const lowerBound = parseFloat(range.replace("Above GHS ", "").trim());
-      if (premiumAmount > lowerBound) {
-        return fee.feePercentage;
-      }
-    } else if (range.includes(" - ")) {
-      // Legacy format: "GHS X - GHS Y" - means X to Y
-      const parts = range.split(" - ");
-      if (parts.length === 2) {
-        const lower = parseFloat(parts[0].replace("GHS ", "").trim());
-        const upper = parseFloat(parts[1].replace("GHS ", "").trim());
-        if (premiumAmount >= lower && premiumAmount <= upper) {
-          return fee.feePercentage;
-        }
-      }
-    } else {
-      // Format: "GHS X" - means 0 to X (inclusive)
-      const upperBound = parseFloat(range.replace("GHS ", "").trim());
-      if (premiumAmount <= upperBound) {
-        return fee.feePercentage;
-      }
-    }
-  }
+//     if (range.includes("Above")) {
+//       // Format: "Above GHS X" - means greater than X
+//       const lowerBound = parseFloat(range.replace("Above GHS ", "").trim());
+//       if (premiumAmount > lowerBound) {
+//         return fee.feePercentage;
+//       }
+//     } else if (range.includes(" - ")) {
+//       // Legacy format: "GHS X - GHS Y" - means X to Y
+//       const parts = range.split(" - ");
+//       if (parts.length === 2) {
+//         const lower = parseFloat(parts[0].replace("GHS ", "").trim());
+//         const upper = parseFloat(parts[1].replace("GHS ", "").trim());
+//         if (premiumAmount >= lower && premiumAmount <= upper) {
+//           return fee.feePercentage;
+//         }
+//       }
+//     } else {
+//       // Format: "GHS X" - means 0 to X (inclusive)
+//       const upperBound = parseFloat(range.replace("GHS ", "").trim());
+//       if (premiumAmount <= upperBound) {
+//         return fee.feePercentage;
+//       }
+//     }
+//   }
 
-  // Default to 2% if no match found
-  return "2%";
-}
+//   // Default to 2% if no match found
+//   return "2%";
+// }
 
 export function PremiumFinancingSummary({
   data,
@@ -80,17 +80,19 @@ export function PremiumFinancingSummary({
     return null;
   }
 
-  // Calculate processing fee percentage based on premium amount (not loan amount)
-  const processingFeePercentage = data.ProcessingFees
-    ? getProcessingFeePercentage(data.premiumAmount, data.ProcessingFees)
-    : "0%";
+  // // Calculate processing fee percentage based on premium amount (not loan amount)
+  // const processingFeePercentage = data.ProcessingFees
+  //   ? getProcessingFeePercentage(data.premiumAmount, data.ProcessingFees)
+  //   : "0%";
 
-  // Calculate processing fee amount based on premium amount
-  const processingFeeAmount =
-    processingFeePercentage !== "0%" && processingFeePercentage !== "N/A"
-      ? (data.premiumAmount * parseFloat(processingFeePercentage.replace("%", ""))) / 100
-      : 0;
+  // // Calculate processing fee amount based on premium amount
+  // const processingFeeAmount =
+  //   processingFeePercentage !== "0%" && processingFeePercentage !== "N/A"
+  //     ? (data.premiumAmount * parseFloat(processingFeePercentage.replace("%", ""))) / 100
+  //     : 0;
 
+  const processingFeePercentage = `${data.processingFeeRate}%`;
+  const processingFeeAmount = data.actualProcessingFee;
   return (
     <div className="p-4 bg-gray-50 rounded-lg space-y-2">
       <h4 className="font-semibold text-sm">Loan Calculation Summary</h4>

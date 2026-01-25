@@ -1,7 +1,6 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import Logo from "@/components/ui/logo";
 import { PremiumShieldTerms } from "@/components/ui/premium-shield-terms";
 import { useAuth } from "@/hooks/use-auth";
 import { API_BASE_URL, COOKIE_KEYS, UPLOADS_BASE_URL } from "@/lib/constants";
@@ -72,12 +71,6 @@ const PremiumFinancingContractPage = () => {
   // Get customer name
   const customerName = paymentSchedule?.user?.fullname || user?.fullname || "N/A";
 
-  // Get insurance company name
-  const insuranceCompanyName = paymentSchedule?.insuranceCompany?.name || "N/A";
-
-  // Get agent name
-  const agentName = paymentSchedule?.user_agent?.user?.fullname || "N/A";
-
   // Get signature URL if available
   const signatureUrl =
     paymentSchedule?.signature && typeof paymentSchedule.signature === "string"
@@ -137,16 +130,14 @@ const PremiumFinancingContractPage = () => {
   return (
     <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       {/* Header Section - PREMIUMSHIELD LOAN PRODUCT FORM */}
-      <div className="border-b-2 border-gray-800 pb-6 mb-8">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+      <div className="border-b-2 border-gray-800 pb-6 mb-8 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
           <div>
-            <Logo />
-            <h1 className="text-xl font-bold mt-4 uppercase tracking-wide">
+            <h1 className="text-xl font-bold uppercase tracking-wide">
               PremiumShield Loan Product Form
             </h1>
           </div>
           <div className="text-right">
-            <p className="text-sm font-medium text-muted-foreground">Generated Date</p>
             <p className="text-base font-semibold">
               {formatDate(new Date().toISOString())}
             </p>
@@ -328,11 +319,7 @@ const PremiumFinancingContractPage = () => {
             </div>
             <div>
               <p className="text-sm font-semibold text-muted-foreground">Lender</p>
-              <p className="text-base font-semibold">{insuranceCompanyName}</p>
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-muted-foreground">Agent</p>
-              <p className="text-base font-semibold">{agentName}</p>
+              <p className="text-base font-semibold">Globafin Microfinance Limited</p>
             </div>
           </div>
         </div>
@@ -432,7 +419,7 @@ const PremiumFinancingContractPage = () => {
           <h3 className="text-lg font-bold mb-6 border-b-2 border-gray-800 pb-2">
             8. Signatures
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 gap-8">
             <div>
               <p className="text-sm font-semibold text-muted-foreground mb-2">
                 Borrower Signature
@@ -443,7 +430,7 @@ const PremiumFinancingContractPage = () => {
                   height={150}
                   src={signatureUrl}
                   alt="Borrower Signature"
-                  className="w-full h-full max-w-[300px] max-h-[150px] object-contain"
+                  className="w-full h-full max-h-[150px] object-contain"
                 />
               ) : (
                 <div className="border rounded-lg p-4 bg-gray-50 h-32 flex items-center justify-center">

@@ -679,29 +679,39 @@ export interface PremiumFinancingCalculateDataRequest {
 
 export interface PremiumFinancingCalculateDataResponse {
   premiumAmount: number;
-  initialDeposit: number;
+  stickerFee: number;
+  processingFeeRate: number;
+  noofInstallments: number;
+  firstInstallment: number;
+  payDifference: number;
+  initialProcessingFee: number;
   minimumInitialDeposit: number;
+  initialloanAmount: number;
+  actualProcessingFee: number;
+  initialDeposit: number;
   loanAmount: number;
-  quoteType: string;
   interestRate: number;
   interestRatePercent: string;
+  paymentFrequency: string;
+  appliedRate: number;
+  appliedRatePercent: string;
   interestPerInstallment: number;
   totalInterestValue: number;
   totalRepayment: number;
-  noofInstallments: number;
-  regularInstallment: number;
-  paymentFrequency: string;
   duration: number;
   currentDeposit: number;
+  regularInstallment: number;
   totalPaid: number;
   balance: number;
   lastInstallmentno: number;
   lastInstallmentvalue: number;
   lastInstallmentdate: string | null;
-  ProcessingFees: {
-    loanAmountRange: string;
-    feePercentage: string;
-  }[];
+  monthlyRate: number;
+  monthlyRatePercent: string;
+  dailyRate: number;
+  dailyRatePercent: string;
+  weeklyRate: number;
+  weeklyRatePercent: string;
 }
 
 export interface DecryptPremiumFinancingRequest {

@@ -127,70 +127,72 @@ const RepaymentSchedulePreviewPage = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Repayment Schedule</h1>
-          <p className="text-sm text-muted-foreground">
-            Printable preview of your repayment schedule
-          </p>
+    <>
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold">Repayment Schedule</h1>
+            <p className="text-sm text-muted-foreground">
+              Printable preview of your repayment schedule
+            </p>
+          </div>
         </div>
+
+        {scheduleData && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+              <div>
+                <p className="text-sm text-muted-foreground">Initial Deposit</p>
+                <p className="text-lg font-semibold">
+                  {formatCurrencyToGHS(scheduleData.initialDeposit)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Loan Amount</p>
+                <p className="text-lg font-semibold">
+                  {formatCurrencyToGHS(scheduleData.loanAmount)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Repayment</p>
+                <p className="text-lg font-semibold">
+                  {formatCurrencyToGHS(scheduleData.totalRepayment)}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Payment Frequency</p>
+                <p className="text-lg font-semibold">{scheduleData.paymentFrequency}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Regular Installment</p>
+                <p className="text-lg font-semibold">
+                  {formatCurrencyToGHS(scheduleData.regularInstallment)}
+                </p>
+              </div>
+            </div>
+
+            <div className="border rounded-lg">
+              <RenderDataTable
+                data={scheduleItems}
+                columns={PAYMENT_SCHEDULE_ITEM_COLUMNS}
+                title="Payment Schedule"
+                isLoading={isLoading}
+                showPagination={false}
+                hideTitle={true}
+                showColumnsFilter={false}
+                showExportAction={false}
+              />
+            </div>
+          </div>
+        )}
+
+        {!scheduleData && (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No repayment schedule available</p>
+          </div>
+        )}
       </div>
-
-      {scheduleData && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
-            <div>
-              <p className="text-sm text-muted-foreground">Initial Deposit</p>
-              <p className="text-lg font-semibold">
-                {formatCurrencyToGHS(scheduleData.initialDeposit)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Loan Amount</p>
-              <p className="text-lg font-semibold">
-                {formatCurrencyToGHS(scheduleData.loanAmount)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Repayment</p>
-              <p className="text-lg font-semibold">
-                {formatCurrencyToGHS(scheduleData.totalRepayment)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Payment Frequency</p>
-              <p className="text-lg font-semibold">{scheduleData.paymentFrequency}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Regular Installment</p>
-              <p className="text-lg font-semibold">
-                {formatCurrencyToGHS(scheduleData.regularInstallment)}
-              </p>
-            </div>
-          </div>
-
-          <div className="border rounded-lg">
-            <RenderDataTable
-              data={scheduleItems}
-              columns={PAYMENT_SCHEDULE_ITEM_COLUMNS}
-              title="Payment Schedule"
-              isLoading={isLoading}
-              showPagination={false}
-              hideTitle={true}
-              showColumnsFilter={false}
-              showExportAction={false}
-            />
-          </div>
-        </div>
-      )}
-
-      {!scheduleData && (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">No repayment schedule available</p>
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 

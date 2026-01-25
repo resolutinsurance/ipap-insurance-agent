@@ -1,3 +1,4 @@
+import GlobafinLetterHead from "@/components/ui/globafin-letterhead";
 import { ReactNode } from "react";
 
 export default function PreviewsLayout({ children }: { children: ReactNode }) {
@@ -27,7 +28,10 @@ export default function PreviewsLayout({ children }: { children: ReactNode }) {
         `,
         }}
       />
-      <div className="bg-white">{children}</div>
+      <div className="bg-white">
+        <GlobafinLetterHead />
+        {children}
+      </div>
     </>
   );
 }

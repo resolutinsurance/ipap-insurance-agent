@@ -33,6 +33,7 @@ interface DeclarationFormProps {
     insuranceTerms: boolean;
     premiumPayment: boolean;
     policyValidity: boolean;
+    createAccount: boolean;
   };
   initialSignature?: File | string;
 }
@@ -52,6 +53,7 @@ export function DeclarationForm({
       insuranceTerms: false,
       premiumPayment: false,
       policyValidity: false,
+      createAccount: false,
     }
   );
 
@@ -185,7 +187,8 @@ export function DeclarationForm({
               }
             />
             <Label htmlFor="termsAndConditions" className="text-sm">
-              I have read and understood the premium financing (loan) terms and conditions.
+              I have read and understood the premium financing (loan) terms and
+              conditions.
             </Label>
           </div>
 
@@ -233,6 +236,21 @@ export function DeclarationForm({
 
           <div className="flex items-start space-x-3">
             <Checkbox
+              id="createAccount"
+              checked={declarations.createAccount}
+              onCheckedChange={(checked) =>
+                handleDeclarationChange("createAccount", checked as boolean)
+              }
+            />
+            <Label htmlFor="createAccount" className="text-sm">
+              I authorize Globafin to create an account on my behalf using the information
+              provided if I do not already have an existing account and wish to apply for
+              a loan
+            </Label>
+          </div>
+
+          <div className="flex items-start space-x-3">
+            <Checkbox
               id="policyValidity"
               checked={declarations.policyValidity}
               onCheckedChange={(checked) =>
@@ -265,6 +283,9 @@ export function DeclarationForm({
           previewSrc={initialSignature}
           onSignatureChange={setCurrentSignature}
         />
+        <p className="text-sm text-gray-500">
+          Please start signing from the left hand side of the page.
+        </p>
       </div>
 
       <Separator />
