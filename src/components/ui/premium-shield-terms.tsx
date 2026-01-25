@@ -168,6 +168,14 @@ export function PremiumShieldTerms({
           This agreement constitutes the entire understanding between the parties and
           supersedes all prior agreements or understandings, whether written or oral.
         </p>
+        <p>
+          <strong>9. LOSS PAYEE</strong>
+          <br />
+          Globafin Limited is designated as Loss Payee on policies financed or supported
+          by Globafin. In the event of policyholder default, the policyholder irrevocably
+          authorizes Globafin to instruct the underwriting insurer to cancel the policy,
+          subject to applicable law, insurer terms, and statutory notice requirements.
+        </p>
       </div>
     </div>
   );

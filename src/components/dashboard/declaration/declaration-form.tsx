@@ -152,14 +152,14 @@ export function DeclarationForm({
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Declaration & Agreement</h2>
         <p className="text-gray-600 mt-2">
-          Please read and accept the following declarations to proceed with your insurance
-          policy
+          Please read and accept the following declarations to proceed with your premium
+          financing (loan) arrangement.
         </p>
       </div>
 
       <Card className="border-none shadow-none">
         <CardHeader className="p-0 border-none shadow-none">
-          <CardTitle>Terms and Conditions</CardTitle>
+          <CardTitle>Loan Terms and Conditions</CardTitle>
         </CardHeader>
         <CardContent className="p-0 border-none shadow-none ">
           <ScrollArea className="h-64 w-full border rounded-md p-4">
@@ -185,7 +185,7 @@ export function DeclarationForm({
               }
             />
             <Label htmlFor="termsAndConditions" className="text-sm">
-              I have read and understood the terms and conditions of this insurance policy
+              I have read and understood the premium financing (loan) terms and conditions.
             </Label>
           </div>
 
@@ -198,8 +198,8 @@ export function DeclarationForm({
               }
             />
             <Label htmlFor="dataProcessing" className="text-sm">
-              I consent to the processing of my personal data for policy administration
-              and claims processing
+              I consent to the processing of my personal data for loan administration,
+              verification, and payment processing.
             </Label>
           </div>
 
@@ -212,8 +212,8 @@ export function DeclarationForm({
               }
             />
             <Label htmlFor="insuranceTerms" className="text-sm">
-              I understand the insurance coverage, exclusions, and limitations as
-              described in the policy
+              I understand this is a loan to finance my insurance premium, and that the
+              insurance policy terms are separate from this loan agreement.
             </Label>
           </div>
 
@@ -226,8 +226,8 @@ export function DeclarationForm({
               }
             />
             <Label htmlFor="premiumPayment" className="text-sm">
-              I agree to pay the premium amount as calculated and understand that payment
-              is required before policy activation
+              I authorize payment of the insurance premium and I agree to repay the loan
+              according to the repayment schedule.
             </Label>
           </div>
 
@@ -240,8 +240,8 @@ export function DeclarationForm({
               }
             />
             <Label htmlFor="policyValidity" className="text-sm">
-              I confirm that all information provided is accurate and the policy will be
-              valid for the specified period
+              I confirm that the information provided for this premium financing request
+              is accurate and complete.
             </Label>
           </div>
         </div>
