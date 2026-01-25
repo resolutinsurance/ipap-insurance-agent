@@ -1,4 +1,4 @@
-import GlobafinLogo from "./globafin-logo";
+import GlobafinLogo from "../ui/globafin-logo";
 
 const GlobafinLetterHead = () => {
   return (

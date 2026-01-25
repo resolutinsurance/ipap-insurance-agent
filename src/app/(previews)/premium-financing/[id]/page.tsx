@@ -1,5 +1,6 @@
 "use client";
 
+import ContractHeader from "@/components/preview/contract-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { PremiumShieldTerms } from "@/components/ui/premium-shield-terms";
 import { useAuth } from "@/hooks/use-auth";
@@ -130,30 +131,10 @@ const PremiumFinancingContractPage = () => {
   return (
     <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       {/* Header Section - PREMIUMSHIELD LOAN PRODUCT FORM */}
-      <div className="border-b-2 border-gray-800 pb-6 mb-8 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-bold uppercase tracking-wide">
-              PremiumShield Loan Product Form
-            </h1>
-          </div>
-          <div className="text-right">
-            <p className="text-base font-semibold">
-              {formatDate(new Date().toISOString())}
-            </p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div className="flex gap-2">
-            <span className="font-semibold">Product Name:</span>
-            <span>PremiumShield</span>
-          </div>
-          <div className="flex gap-2">
-            <span className="font-semibold">Product Code / ID:</span>
-            <span>{paymentSchedule.refId || paymentSchedule.id}</span>
-          </div>
-        </div>
-      </div>
+      <ContractHeader
+        productName="PremiumShield"
+        productCode={paymentSchedule.refId || paymentSchedule.id}
+      />
 
       <div className="space-y-8">
         {/* Section 1: Product Details */}
@@ -240,47 +221,6 @@ const PremiumFinancingContractPage = () => {
             </div>
           </div>
         </div>
-
-        {/* Section 2: Eligibility Criteria */}
-        {/* <div>
-          <h3 className="text-lg font-bold mb-6 border-b-2 border-gray-800 pb-2">
-            2. Eligibility Criteria
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div className="flex gap-2">
-              <span className="font-semibold">Minimum age:</span>
-              <span>N/A</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="font-semibold">Maximum age at loan maturity:</span>
-              <span>N/A</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="font-semibold">Residency / Citizenship:</span>
-              <span>N/A</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="font-semibold">Employment / Business status:</span>
-              <span>N/A</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="font-semibold">
-                Minimum monthly income / business revenue:
-              </span>
-              <span>N/A</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="font-semibold">
-                Credit history / prior borrowing requirement:
-              </span>
-              <span>N/A</span>
-            </div>
-            <div className="md:col-span-2 flex gap-2">
-              <span className="font-semibold">Other eligibility conditions:</span>
-              <span>N/A</span>
-            </div>
-          </div>
-        </div> */}
 
         {/* Section 3: Documentation Required */}
         <div>

@@ -1,4 +1,4 @@
-import GlobafinLetterHead from "@/components/ui/globafin-letterhead";
+import GlobafinLetterHead from "@/components/preview/globafin-letterhead";
 import { ReactNode } from "react";
 
 export default function PreviewsLayout({ children }: { children: ReactNode }) {
