@@ -1,3 +1,4 @@
+import { MAIN_PRODUCT_QUOTE_TYPES, MainProductQuoteType } from "@/lib/constants";
 import { prepareObjectFields } from "@/lib/data-renderer";
 import { PremiumFinancingCalculateDataResponse } from "@/lib/interfaces";
 import { formatCurrencyToGHS } from "@/lib/utils";
@@ -7,6 +8,7 @@ interface PremiumFinancingSummaryProps {
   isLoading?: boolean;
   error?: Error | null;
   enabled?: boolean;
+  quoteType: MainProductQuoteType;
 }
 
 export function PremiumFinancingSummary({
@@ -14,6 +16,7 @@ export function PremiumFinancingSummary({
   isLoading,
   error,
   enabled = true,
+  quoteType,
 }: PremiumFinancingSummaryProps) {
   // Only render if enabled (for premium-financing type)
   if (!enabled) {
@@ -55,7 +58,7 @@ export function PremiumFinancingSummary({
     totalPaid: formatCurrencyToGHS(data.totalPaid),
     balance: formatCurrencyToGHS(data.balance),
     lastInstallmentvalue: formatCurrencyToGHS(data.lastInstallmentvalue),
-    processingFeeRate: `${data.processingFeeRate}%`,
+    processingFeeRate: `${data.processingFeeRate * 100}%`,
     // Format raw rate fields (only the matching frequency will be shown)
     monthlyInterestRate: data.monthlyRate,
     dailyInterestRate: data.dailyRate,
@@ -83,6 +86,8 @@ export function PremiumFinancingSummary({
     "monthlyRate",
     "dailyRate",
     "initialloanAmount",
+    "firstInstallment",
+    "stickerFee",
   ];
 
   // Exclude rate fields that don't match the payment frequency
@@ -94,6 +99,12 @@ export function PremiumFinancingSummary({
   }
   if (paymentFrequency !== "weekly") {
     excludeKeys.push("weeklyInterestRate", "weeklyRatePercent");
+  }
+  if (
+    quoteType === MAIN_PRODUCT_QUOTE_TYPES.THIRDPARTY ||
+    quoteType === MAIN_PRODUCT_QUOTE_TYPES.COMPREHENSIVE
+  ) {
+    excludeKeys.push("stickerFee");
   }
 
   const fields = prepareObjectFields(

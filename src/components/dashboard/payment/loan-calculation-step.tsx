@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAutoCalculatePremiumFinancing } from "@/hooks/use-premium-financing";
+import { MainProductQuoteType } from "@/lib/constants";
 import { PaymentFrequency } from "@/lib/interfaces";
 import { paymentVerificationAtom } from "@/lib/store";
 import type { PaymentVerificationState } from "@/lib/store/payment-verification";
@@ -18,7 +19,7 @@ interface LoanCalculationStepProps {
   onNext: () => void;
   onCancel: () => void;
   isLoading?: boolean;
-  quoteType: string;
+  quoteType: MainProductQuoteType;
   nextButtonLabel?: string;
   verificationAtom?: WritableAtom<
     PaymentVerificationState,
@@ -138,6 +139,7 @@ export function LoanCalculationStep({
           isLoading={calculatePremiumFinancingData.isPending}
           error={calculatePremiumFinancingData.error}
           enabled={true}
+          quoteType={quoteType}
         />
       </div>
 

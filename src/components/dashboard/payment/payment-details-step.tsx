@@ -325,6 +325,7 @@ export function PaymentDetailsStep({
               isLoading={calculatePremiumFinancingData.isPending}
               error={calculatePremiumFinancingData.error}
               enabled={true}
+              quoteType={quoteType}
             />
           </div>
         )}
