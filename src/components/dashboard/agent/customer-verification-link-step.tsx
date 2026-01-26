@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, CheckCircle2, Copy, Mail, Send } from "lucide-react";
+import { Check, Copy, Mail, Send } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 
@@ -71,10 +71,7 @@ export function CustomerVerificationLinkStep({
 
       {linkSent ? (
         <Card className="border-green-200 bg-green-50/50">
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle2 className="h-6 w-6 text-green-600" />
-            </div>
+          <CardHeader>
             <CardTitle className="text-green-800">
               Verification Link Sent Successfully!
             </CardTitle>
@@ -84,7 +81,7 @@ export function CustomerVerificationLinkStep({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-center gap-2 text-sm text-green-700">
+            <div className="flex items-center gap-2 text-sm text-green-700">
               <Mail className="h-4 w-4" />
               <span>
                 The customer can now complete their verification and payment steps
@@ -94,9 +91,6 @@ export function CustomerVerificationLinkStep({
 
             {clientLink && (
               <div className="mt-4 space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Verification Link
-                </label>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm">
                     <span className="text-gray-600 break-all">

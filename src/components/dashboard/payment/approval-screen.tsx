@@ -16,6 +16,7 @@ const ApprovalScreen = ({
   refId,
   paymentId,
   pfId,
+  onNext,
 }: {
   type: "premium-financing" | "one-time";
   paymentId: string;
@@ -24,6 +25,7 @@ const ApprovalScreen = ({
   accountNumber: string;
   /** Premium Financing ID (premiumfinancingID from quote payment) - required for premium-financing type */
   pfId?: string;
+  onNext?: () => void;
 }) => {
   const { verifyPayment, verifyAPNMPayment } = useQuotePayments();
   const [loading, setLoading] = React.useState(false);
@@ -47,8 +49,12 @@ const ApprovalScreen = ({
       if (type === "premium-financing" && pfId) {
         setShowOTPModal(true);
       } else {
-        // For one-time payments, redirect to purchased page
-        window.location.href = ROUTES.AGENT.POLICY.PURCHASED;
+        if (onNext) {
+          onNext();
+        } else {
+          // For one-time payments, redirect to purchased page
+          window.location.href = ROUTES.AGENT.POLICY.PURCHASED;
+        }
       }
     } catch (error: unknown) {
       if (error instanceof Error && error.message.includes("400")) {

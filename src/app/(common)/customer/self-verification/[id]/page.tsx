@@ -288,7 +288,15 @@ const CustomerPremiumFinancingVerificationPage = () => {
                     refId={approvalDetails.refId}
                     accountNumber={approvalDetails.accountNumber}
                     pfId={approvalDetails.pfId}
+                    onNext={() => setCurrentStep(7)}
                   />
+                )}
+                {currentStep === 7 && (
+                  <div className="text-center py-6 sm:py-8">
+                    <p className="text-muted-foreground text-sm sm:text-base">
+                      Payment successful. You can now close this page.
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
