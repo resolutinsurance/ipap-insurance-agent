@@ -1,4 +1,6 @@
+import { prepareObjectFields } from "@/lib/data-renderer";
 import { PremiumFinancingCalculateDataResponse } from "@/lib/interfaces";
+import { formatCurrencyToGHS } from "@/lib/utils";
 
 interface PremiumFinancingSummaryProps {
   data?: PremiumFinancingCalculateDataResponse;
@@ -7,56 +9,6 @@ interface PremiumFinancingSummaryProps {
   enabled?: boolean;
 }
 
-// /**
-//  * Determines the processing fee percentage based on premium amount
-//  * Handles formats:
-//  * - "GHS X" - means 0 to X
-//  * - "Above GHS X" - means greater than X
-//  * - "GHS X - GHS Y" - means X to Y (legacy format)
-//  *
-//  * Default is 2% if no matching range found
-//  */
-// function getProcessingFeePercentage(
-//   premiumAmount: number,
-//   processingFees: { loanAmountRange: string; feePercentage: string }[]
-// ): string {
-//   if (!processingFees || processingFees.length === 0) {
-//     return "2%";
-//   }
-
-//   // Check each fee range to find the matching one
-//   for (const fee of processingFees) {
-//     const range = fee.loanAmountRange;
-
-//     if (range.includes("Above")) {
-//       // Format: "Above GHS X" - means greater than X
-//       const lowerBound = parseFloat(range.replace("Above GHS ", "").trim());
-//       if (premiumAmount > lowerBound) {
-//         return fee.feePercentage;
-//       }
-//     } else if (range.includes(" - ")) {
-//       // Legacy format: "GHS X - GHS Y" - means X to Y
-//       const parts = range.split(" - ");
-//       if (parts.length === 2) {
-//         const lower = parseFloat(parts[0].replace("GHS ", "").trim());
-//         const upper = parseFloat(parts[1].replace("GHS ", "").trim());
-//         if (premiumAmount >= lower && premiumAmount <= upper) {
-//           return fee.feePercentage;
-//         }
-//       }
-//     } else {
-//       // Format: "GHS X" - means 0 to X (inclusive)
-//       const upperBound = parseFloat(range.replace("GHS ", "").trim());
-//       if (premiumAmount <= upperBound) {
-//         return fee.feePercentage;
-//       }
-//     }
-//   }
-
-//   // Default to 2% if no match found
-//   return "2%";
-// }
-
 export function PremiumFinancingSummary({
   data,
   isLoading,
@@ -64,7 +16,7 @@ export function PremiumFinancingSummary({
   enabled = true,
 }: PremiumFinancingSummaryProps) {
   // Only render if enabled (for premium-financing type)
-  if (!enabled) {
+  if (!enabled || !data) {
     return null;
   }
 
@@ -76,65 +28,85 @@ export function PremiumFinancingSummary({
     return <div className="text-sm text-red-500">{error.message}</div>;
   }
 
-  if (!data) {
-    return null;
+  // Get payment frequency to determine which rates to show
+  const paymentFrequency = data.paymentFrequency?.toLowerCase() || "monthly";
+
+  // Prepare data with formatted currency values for display
+  const displayData = {
+    ...data,
+    // Format currency fields for better display
+    premiumAmount: formatCurrencyToGHS(data.premiumAmount),
+    stickerFee: formatCurrencyToGHS(data.stickerFee),
+    firstInstallment: formatCurrencyToGHS(data.firstInstallment),
+    minimumInitialDeposit: formatCurrencyToGHS(data.minimumInitialDeposit),
+    initialloanAmount: formatCurrencyToGHS(data.initialloanAmount),
+    actualProcessingFee: formatCurrencyToGHS(data.actualProcessingFee),
+    initialDeposit: formatCurrencyToGHS(data.initialDeposit),
+    loanAmount: formatCurrencyToGHS(data.loanAmount),
+    interestPerInstallment: formatCurrencyToGHS(data.interestPerInstallment),
+    totalInterestValue: formatCurrencyToGHS(data.totalInterestValue),
+    totalRepayment: formatCurrencyToGHS(data.totalRepayment),
+    currentDeposit: formatCurrencyToGHS(data.currentDeposit),
+    regularInstallment: formatCurrencyToGHS(data.regularInstallment),
+    totalPaid: formatCurrencyToGHS(data.totalPaid),
+    balance: formatCurrencyToGHS(data.balance),
+    lastInstallmentvalue: formatCurrencyToGHS(data.lastInstallmentvalue),
+    processingFeeRate: `${data.processingFeeRate}%`,
+    // Format raw rate fields (only the matching frequency will be shown)
+    monthlyInterestRate: data.monthlyRate,
+    dailyInterestRate: data.dailyRate,
+    weeklyInterestRate: data.weeklyRate,
+  };
+
+  // Determine which rate fields to exclude based on payment frequency
+  const excludeKeys = [
+    "balance",
+    "lastInstallmentvalue",
+    "payDifference",
+    "currentDeposit",
+    "appliedRatePercent",
+    "appliedRate",
+    "lastInstallmentno",
+    "lastInstallmentdate",
+    "interestRatePercent",
+    "duration",
+    "initialProcessingFee",
+    "totalInterestValue",
+    "interestRate",
+    "appliedRate",
+    "appliedRatePercent",
+    "weeklyRate",
+    "monthlyRate",
+    "dailyRate",
+    "initialloanAmount",
+  ];
+
+  // Exclude rate fields that don't match the payment frequency
+  if (paymentFrequency !== "monthly") {
+    excludeKeys.push("monthlyInterestRate", "monthlyRatePercent");
+  }
+  if (paymentFrequency !== "daily") {
+    excludeKeys.push("dailyInterestRate", "dailyRatePercent");
+  }
+  if (paymentFrequency !== "weekly") {
+    excludeKeys.push("weeklyInterestRate", "weeklyRatePercent");
   }
 
-  // // Calculate processing fee percentage based on premium amount (not loan amount)
-  // const processingFeePercentage = data.ProcessingFees
-  //   ? getProcessingFeePercentage(data.premiumAmount, data.ProcessingFees)
-  //   : "0%";
+  const fields = prepareObjectFields(
+    displayData,
+    excludeKeys as (keyof typeof displayData)[]
+  );
 
-  // // Calculate processing fee amount based on premium amount
-  // const processingFeeAmount =
-  //   processingFeePercentage !== "0%" && processingFeePercentage !== "N/A"
-  //     ? (data.premiumAmount * parseFloat(processingFeePercentage.replace("%", ""))) / 100
-  //     : 0;
-
-  const processingFeePercentage = `${data.processingFeeRate}%`;
-  const processingFeeAmount = data.actualProcessingFee;
   return (
     <div className="p-4 bg-gray-50 rounded-lg space-y-2">
       <h4 className="font-semibold text-sm">Loan Calculation Summary</h4>
-      <div className="grid grid-cols-2 gap-2 text-sm">
-        <div>
-          <span className="text-gray-600">Initial Deposit:</span>
-          <span className="font-medium ml-2">GHS {data.initialDeposit.toFixed(2)}</span>
-        </div>
-        <div>
-          <span className="text-gray-600">Loan Amount:</span>
-          <span className="font-medium ml-2">GHS {data.loanAmount.toFixed(2)}</span>
-        </div>
-        <div>
-          <span className="text-gray-600">Processing Fee:</span>
-          <span className="font-medium ml-2">
-            {processingFeePercentage} (GHS {processingFeeAmount.toFixed(2)})
-          </span>
-        </div>
-        <div>
-          <span className="text-gray-600">Interest Rate:</span>
-          <span className="font-medium ml-2">{data.interestRatePercent}</span>
-        </div>
-        <div>
-          <span className="text-gray-600">Regular Installment:</span>
-          <span className="font-medium ml-2">
-            GHS {data.regularInstallment.toFixed(2)}
-          </span>
-        </div>
-        <div>
-          <span className="text-gray-600">Total Interest:</span>
-          <span className="font-medium ml-2">
-            GHS {data.totalInterestValue.toFixed(2)}
-          </span>
-        </div>
-        <div>
-          <span className="text-gray-600">Total Repayment:</span>
-          <span className="font-medium ml-2">GHS {data.totalRepayment.toFixed(2)}</span>
-        </div>
-        <div>
-          <span className="text-gray-600">No. of Installments:</span>
-          <span className="font-medium ml-2">{data.noofInstallments}</span>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {fields.map(({ key, label, value }) => (
+          <div className="text-sm" key={key}>
+            <span className="text-gray-600">{label}:</span>
+            <span className="font-medium ml-2">{String(value)}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

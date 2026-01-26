@@ -1,5 +1,6 @@
 "use client";
 
+import PaymentSummary from "@/components/quote-payments/payment-summary";
 import { PremiumFinancingSummary } from "@/components/quote-payments/premium-financing-summary";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -421,6 +422,11 @@ export function PaymentDetailsStep({
               </p>
             )}
         </div>
+        <PaymentSummary
+          paymentData={paymentData}
+          actualProcessingFee={loanData?.actualProcessingFee || 0}
+          initialDeposit={loanData?.initialDeposit || 0}
+        />
       </div>
 
       <div className="flex gap-4 justify-end">

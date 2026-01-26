@@ -1779,3 +1779,12 @@ export interface PremiumFinancingScheduleRequest {
 }
 
 export type PaymentFrequency = "daily" | "weekly" | "monthly";
+
+export type Declaration = {
+  termsAndConditions: boolean;
+  dataProcessing: boolean;
+  insuranceTerms: boolean;
+  premiumPayment: boolean;
+  policyValidity: boolean;
+  createAccount: boolean;
+};

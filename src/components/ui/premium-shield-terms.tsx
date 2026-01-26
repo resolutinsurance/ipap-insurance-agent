@@ -22,10 +22,6 @@ interface PremiumShieldTermsProps {
    */
   initialDeposit?: string;
   /**
-   * Format currency helper function (optional, defaults to simple formatting)
-   */
-  formatCurrency?: (value: string | number | undefined | null) => string;
-  /**
    * Variant: "full" for all 8 terms, "short" for abbreviated version
    */
   variant?: "full" | "short";

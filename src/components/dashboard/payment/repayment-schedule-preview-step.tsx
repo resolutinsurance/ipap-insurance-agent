@@ -76,29 +76,29 @@ export const RepaymentSchedulePreviewStep = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
             <div>
               <p className="text-sm text-muted-foreground">Initial Deposit</p>
-              <p className="text-lg font-semibold">
+              <p className="font-semibold">
                 {formatCurrencyToGHS(scheduleData.initialDeposit)}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Loan Amount</p>
-              <p className="text-lg font-semibold">
+              <p className="font-semibold">
                 {formatCurrencyToGHS(scheduleData.loanAmount)}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Repayment</p>
-              <p className="text-lg font-semibold">
+              <p className="font-semibold">
                 {formatCurrencyToGHS(scheduleData.totalRepayment)}
               </p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Payment Frequency</p>
-              <p className="text-lg font-semibold">{scheduleData.paymentFrequency}</p>
+              <p className="font-semibold">{scheduleData.paymentFrequency}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Regular Installment</p>
-              <p className="text-lg font-semibold">
+              <p className="font-semibold">
                 {formatCurrencyToGHS(scheduleData.regularInstallment)}
               </p>
             </div>

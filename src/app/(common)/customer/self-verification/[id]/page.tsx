@@ -109,6 +109,7 @@ const CustomerPremiumFinancingVerificationPage = () => {
       type: "premium-financing",
       quoteType: productTypeParam!,
       isInstallment: false,
+      verificationType: "remote-verification",
     });
   if (decryptPremiumFinancing.isPending && !decryptPremiumFinancing.data) {
     return (

@@ -9,6 +9,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import SignaturePad from "@/components/ui/signature-pad";
 import { useUploadSingleFile } from "@/hooks/use-file-upload";
+import { Declaration } from "@/lib/interfaces";
+import { PaymentVerificationState } from "@/lib/store/payment-verification";
 import { convertBase64ToFile } from "@/lib/utils/file-utils";
 import React from "react";
 import { toast } from "sonner";
@@ -17,24 +19,8 @@ interface DeclarationFormProps {
   onSuccess: (signatureFilename?: string) => void | Promise<void>;
   onCancel: () => void;
   skipQuoteUpdate?: boolean;
-  updateVerificationState?: (updates: {
-    declarations?: {
-      termsAndConditions: boolean;
-      dataProcessing: boolean;
-      insuranceTerms: boolean;
-      premiumPayment: boolean;
-      policyValidity: boolean;
-    };
-    signatureFilename?: string | undefined;
-  }) => Promise<void>;
-  initialDeclarations?: {
-    termsAndConditions: boolean;
-    dataProcessing: boolean;
-    insuranceTerms: boolean;
-    premiumPayment: boolean;
-    policyValidity: boolean;
-    createAccount: boolean;
-  };
+  updateVerificationState?: (updates: Partial<PaymentVerificationState>) => Promise<void>;
+  initialDeclarations?: Declaration;
   initialSignature?: File | string;
 }
 

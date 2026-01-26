@@ -163,6 +163,9 @@ export function LoanCalculationStep({
                     totalPaid: calculatePremiumFinancingData.data.totalPaid,
                     regularInstallment:
                       calculatePremiumFinancingData.data.regularInstallment,
+                    actualProcessingFee:
+                      calculatePremiumFinancingData.data.actualProcessingFee,
+                    stickerFee: calculatePremiumFinancingData.data.stickerFee,
                   }
                 : {}),
             };

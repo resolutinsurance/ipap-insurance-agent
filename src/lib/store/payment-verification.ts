@@ -1,4 +1,4 @@
-import { PaymentFrequency } from "../interfaces";
+import { Declaration, PaymentFrequency } from "../interfaces";
 import {
   MainUserGhanaCardVerificationResponse,
   PublicGhanaCardVerificationResponse,
@@ -27,13 +27,7 @@ export interface PaymentVerificationState {
   // Signature filename (stored after uploading to API, originalname from upload response)
   signatureFilename?: string;
   // Declaration checkboxes state
-  declarations?: {
-    termsAndConditions: boolean;
-    dataProcessing: boolean;
-    insuranceTerms: boolean;
-    premiumPayment: boolean;
-    policyValidity: boolean;
-  };
+  declarations?: Declaration;
   ghanaCardResponse:
     | PublicGhanaCardVerificationResponse
     | MainUserGhanaCardVerificationResponse
@@ -49,6 +43,8 @@ export interface PaymentVerificationState {
     totalRepayment?: number;
     totalPaid?: number;
     regularInstallment?: number;
+    actualProcessingFee?: number;
+    stickerFee?: number;
   };
   // Payment details
   paymentData?: {

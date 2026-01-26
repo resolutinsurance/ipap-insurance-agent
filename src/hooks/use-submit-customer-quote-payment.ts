@@ -26,6 +26,7 @@ interface UseSubmitCustomerQuotePaymentParams {
   isInstallment?: boolean;
   installmentDuration?: number;
   installmentPaymentFrequency?: string;
+  verificationType: "remote-verification" | "standard-verification";
 }
 
 export function useSubmitCustomerQuotePayment({
@@ -39,6 +40,7 @@ export function useSubmitCustomerQuotePayment({
   isInstallment = false,
   installmentDuration,
   installmentPaymentFrequency,
+  verificationType,
 }: UseSubmitCustomerQuotePaymentParams) {
   const [paymentVerification] = useAtom(customerSelfVerificationAtom);
   const { makeQuotePayment } = useQuotePayments();
@@ -142,7 +144,7 @@ export function useSubmitCustomerQuotePayment({
             // Wait longer to ensure backend has finished processing
             await new Promise((resolve) => setTimeout(resolve, 2000));
 
-            const fullPreviewUrl = `${window.location.origin}/premium-financing/${paymentId}`;
+            const fullPreviewUrl = `${window.location.origin}/premium-financing/${paymentId}?type=${verificationType}`;
 
             const blob = await generatePDF({
               url: fullPreviewUrl,
@@ -204,7 +206,7 @@ export function useSubmitCustomerQuotePayment({
             // Wait longer to ensure backend has finished processing
             await new Promise((resolve) => setTimeout(resolve, 2000));
 
-            const fullPreviewUrl = `${window.location.origin}/quote-payment/${paymentId}`;
+            const fullPreviewUrl = `${window.location.origin}/quote-payment/${paymentId}?type=${verificationType}`;
 
             const blob = await generatePDF({
               url: fullPreviewUrl,

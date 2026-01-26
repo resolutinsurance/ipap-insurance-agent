@@ -11,6 +11,9 @@ export default function PreviewsLayout({ children }: { children: ReactNode }) {
             size: A4;
             margin: 2.1cm 1.9cm 1.8cm 1.32cm;
           }
+          body {
+            background-color: #fff;
+          }
 
           @page {
             @bottom-right {

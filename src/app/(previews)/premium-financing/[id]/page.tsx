@@ -6,7 +6,7 @@ import { PremiumShieldTerms } from "@/components/ui/premium-shield-terms";
 import { useAuth } from "@/hooks/use-auth";
 import { API_BASE_URL, COOKIE_KEYS, UPLOADS_BASE_URL } from "@/lib/constants";
 import { PaymentSchedule } from "@/lib/interfaces";
-import { formatDate } from "@/lib/utils";
+import { formatCurrencyToGHS, formatDate } from "@/lib/utils";
 import Cookies from "js-cookie";
 import { CheckSquare, Loader2 } from "lucide-react";
 import Image from "next/image";
@@ -14,7 +14,8 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const PremiumFinancingContractPage = () => {
-  const { id } = useParams();
+  const { id, type } = useParams();
+  const verificationType = type?.toString() || "";
   const searchParams = useSearchParams();
   const { user } = useAuth();
   const financingId = id?.toString() || "";
@@ -22,6 +23,8 @@ const PremiumFinancingContractPage = () => {
   const [paymentSchedule, setPaymentSchedule] = useState<PaymentSchedule | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  const isRemoteVerification = verificationType === "remote-verification";
 
   useEffect(() => {
     const fetchPremiumFinancing = async () => {
@@ -43,7 +46,8 @@ const PremiumFinancingContractPage = () => {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+            ...(accessToken &&
+              !isRemoteVerification && { Authorization: `Bearer ${accessToken}` }),
           },
         });
 
@@ -77,14 +81,6 @@ const PremiumFinancingContractPage = () => {
     paymentSchedule?.signature && typeof paymentSchedule.signature === "string"
       ? `${UPLOADS_BASE_URL}${paymentSchedule.signature}`
       : null;
-
-  // Helper to format currency
-  const formatCurrency = (value: string | number | undefined | null): string => {
-    if (!value) return "N/A";
-    const num = typeof value === "string" ? parseFloat(value) : value;
-    if (isNaN(num)) return "N/A";
-    return `GHS ${num.toLocaleString()}`;
-  };
 
   if (isLoading) {
     return (
@@ -164,11 +160,11 @@ const PremiumFinancingContractPage = () => {
             </div>
             <div className="flex gap-2">
               <span className="font-semibold">Minimum Loan Amount:</span>
-              <span>{formatCurrency(paymentSchedule.minimumInitialDeposit)}</span>
+              <span>{formatCurrencyToGHS(paymentSchedule.minimumInitialDeposit)}</span>
             </div>
             <div className="flex gap-2">
               <span className="font-semibold">Maximum Loan Amount:</span>
-              <span>{formatCurrency(paymentSchedule.loanAmount)}</span>
+              <span>{formatCurrencyToGHS(paymentSchedule.loanAmount)}</span>
             </div>
             <div className="flex gap-2">
               <span className="font-semibold">Tenor (term):</span>
@@ -194,7 +190,7 @@ const PremiumFinancingContractPage = () => {
             </div>
             <div className="flex gap-2">
               <span className="font-semibold">Premium Amount:</span>
-              <span>{formatCurrency(paymentSchedule.premiumAmount)}</span>
+              <span>{formatCurrencyToGHS(paymentSchedule.premiumAmount)}</span>
             </div>
           </div>
 
@@ -272,35 +268,35 @@ const PremiumFinancingContractPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="flex gap-2">
               <span className="font-semibold">Regular Installment:</span>
-              <span>{formatCurrency(paymentSchedule.regularInstallment)}</span>
+              <span>{formatCurrencyToGHS(paymentSchedule.regularInstallment)}</span>
             </div>
             <div className="flex gap-2">
               <span className="font-semibold">Interest Per Installment:</span>
-              <span>{formatCurrency(paymentSchedule.interestPerInstallment)}</span>
+              <span>{formatCurrencyToGHS(paymentSchedule.interestPerInstallment)}</span>
             </div>
             <div className="flex gap-2">
               <span className="font-semibold">Initial Deposit:</span>
-              <span>{formatCurrency(paymentSchedule.initialDeposit)}</span>
+              <span>{formatCurrencyToGHS(paymentSchedule.initialDeposit)}</span>
             </div>
             <div className="flex gap-2">
               <span className="font-semibold">Current Deposit:</span>
-              <span>{formatCurrency(paymentSchedule.currentDeposit)}</span>
+              <span>{formatCurrencyToGHS(paymentSchedule.currentDeposit)}</span>
             </div>
             <div className="flex gap-2">
               <span className="font-semibold">Outstanding Balance:</span>
-              <span>{formatCurrency(paymentSchedule.balance)}</span>
+              <span>{formatCurrencyToGHS(paymentSchedule.balance)}</span>
             </div>
             <div className="flex gap-2">
               <span className="font-semibold">Total Interest:</span>
-              <span>{formatCurrency(paymentSchedule.totalInterestvalue)}</span>
+              <span>{formatCurrencyToGHS(paymentSchedule.totalInterestvalue)}</span>
             </div>
             <div className="flex gap-2">
               <span className="font-semibold">Total Repayment:</span>
-              <span>{formatCurrency(paymentSchedule.totalRepayment)}</span>
+              <span>{formatCurrencyToGHS(paymentSchedule.totalRepayment)}</span>
             </div>
             <div className="flex gap-2">
               <span className="font-semibold">Total Paid:</span>
-              <span>{formatCurrency(paymentSchedule.totalPaid)}</span>
+              <span>{formatCurrencyToGHS(paymentSchedule.totalPaid)}</span>
             </div>
             <div className="flex gap-2">
               <span className="font-semibold">Loan Status:</span>
@@ -343,13 +339,12 @@ const PremiumFinancingContractPage = () => {
             noofInstallments={paymentSchedule.noofInstallments}
             regularInstallment={
               paymentSchedule.regularInstallment
-                ? formatCurrency(paymentSchedule.regularInstallment)
+                ? formatCurrencyToGHS(paymentSchedule.regularInstallment)
                 : undefined
             }
             paymentFrequency={paymentSchedule.paymentFrequency}
             interestRate={paymentSchedule.interestRate}
-            initialDeposit={formatCurrency(paymentSchedule.initialDeposit)}
-            formatCurrency={formatCurrency}
+            initialDeposit={formatCurrencyToGHS(paymentSchedule.initialDeposit)}
             variant="full"
           />
         </div>

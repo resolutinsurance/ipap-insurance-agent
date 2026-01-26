@@ -14,7 +14,7 @@ import {
 } from "@/lib/interfaces";
 import axios from "axios";
 import api from "../api";
-import { DEFAULT_PAGE_SIZE } from "../constants";
+import { API_BASE_URL, DEFAULT_PAGE_SIZE } from "../constants";
 import {
   AgentSetupPremiumFinancingResponse,
   APIResponse,
@@ -189,11 +189,8 @@ export const customerUpdatePremiumFinancing = async (
 ): Promise<PaymentSchedule> => {
   try {
     const response = await axios.put(
-      `${process.env.NEXT_PUBLIC_API_URL}/PremiumFinancing/remote-verification/${id}`,
-      data,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
+      `${API_BASE_URL}/PremiumFinancing/remote-verification/${id}`,
+      data
     );
     return response.data.message;
   } catch (error) {
