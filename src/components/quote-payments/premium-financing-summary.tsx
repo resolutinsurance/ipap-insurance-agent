@@ -16,7 +16,7 @@ export function PremiumFinancingSummary({
   enabled = true,
 }: PremiumFinancingSummaryProps) {
   // Only render if enabled (for premium-financing type)
-  if (!enabled || !data) {
+  if (!enabled) {
     return null;
   }
 
@@ -26,6 +26,10 @@ export function PremiumFinancingSummary({
 
   if (error) {
     return <div className="text-sm text-red-500">{error.message}</div>;
+  }
+
+  if (!data) {
+    return null;
   }
 
   // Get payment frequency to determine which rates to show
