@@ -10,6 +10,20 @@ const nextConfig: NextConfig = {
       { hostname: "jelly.resolutfinance.com" },
     ],
   },
+  redirects: async () => {
+    return [
+      {
+        source: "/",
+        destination: "/dashboard/home",
+        permanent: true,
+      },
+      {
+        source: "/dashboard",
+        destination: "/dashboard/home",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
