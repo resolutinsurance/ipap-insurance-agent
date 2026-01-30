@@ -70,18 +70,16 @@ export function CustomerVerificationLinkStep({
       </div>
 
       {linkSent ? (
-        <Card className="border-green-200 bg-green-50/50">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-green-800">
-              Verification Link Sent Successfully!
-            </CardTitle>
-            <CardDescription className="text-green-700">
+            <CardTitle>Verification Link Sent Successfully!</CardTitle>
+            <CardDescription>
               A secure verification link has been sent directly to the customer&apos;s
               email address or phone number associated with this policy.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-green-700">
+            <div className="flex items-center gap-2 text-sm">
               <Mail className="h-4 w-4" />
               <span>
                 The customer can now complete their verification and payment steps

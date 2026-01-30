@@ -19,6 +19,7 @@ const SKIP_LOGOUT_ROUTE_PATTERNS = [
   "/public", // Public endpoints
   "/PremiumFinancing/remote-verification",
   "/PremiumFinancing/verifyPaymentTransaction",
+  "/VerifyGhanaCard",
 ];
 
 // Helper function to check if a URL should skip logout

@@ -160,7 +160,9 @@ export const LoyaltyFetchPolicyDetails = () => {
     <div className="space-y-4">
       <div className="flex items-end gap-2">
         <div className="flex-1">
-          <p className="text-sm text-muted-foreground mb-1">Enter Policy ID</p>
+          <p className="text-sm text-muted-foreground mb-1">
+            Enter Debit Note or Policy ID
+          </p>
           <Input
             value={policyId}
             onChange={(e) => setPolicyId(e.target.value)}

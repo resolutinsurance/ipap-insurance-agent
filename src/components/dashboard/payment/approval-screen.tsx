@@ -70,13 +70,23 @@ const ApprovalScreen = ({
   const handleOTPSuccess = () => {
     setShowOTPModal(false);
     toast.success("Auto-debit setup completed!");
-    window.location.href = ROUTES.AGENT.POLICY.PURCHASED;
+    if (onNext) {
+      onNext();
+    } else {
+      // For one-time payments, redirect to purchased page
+      window.location.href = ROUTES.AGENT.POLICY.PURCHASED;
+    }
   };
 
   const handleOTPClose = () => {
     setShowOTPModal(false);
     // Still redirect after closing modal since payment was verified
-    window.location.href = ROUTES.AGENT.POLICY.PURCHASED;
+    if (onNext) {
+      onNext();
+    } else {
+      // For one-time payments, redirect to purchased page
+      window.location.href = ROUTES.AGENT.POLICY.PURCHASED;
+    }
   };
 
   return (
