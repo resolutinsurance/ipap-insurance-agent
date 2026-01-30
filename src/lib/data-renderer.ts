@@ -195,3 +195,24 @@ export const prepareObjectFields = <T extends Record<string, unknown>>(
     };
   });
 };
+
+/**
+ * Prepare object fields without automatic exclusions.
+ *
+ * Useful when you want a simple `Object.entries(obj)` mapping while still being
+ * able to omit a few keys manually.
+ */
+export const prepareObjectFieldsWithManualExclusionsOnly = <
+  T extends Record<string, unknown>,
+>(
+  obj: T,
+  excludeKeys: (keyof T)[] = []
+): Array<{ key: string; label: string; value: unknown }> => {
+  return Object.entries(obj)
+    .filter(([key]) => !excludeKeys.includes(key as keyof T))
+    .map(([key, value]) => ({
+      key,
+      label: formatKeyName(key),
+      value,
+    }));
+};

@@ -122,7 +122,14 @@ export const TRANSACTION_JOURNAL_COLUMNS: ColumnDef<TransactionJournalEntry>[] =
       </div>
     ),
   },
-
+  {
+    accessorKey: "quoteType",
+    header: "Insurance Type",
+    cell: ({ row }) => {
+      const quoteType = row.original.quoteType;
+      return <div className="font-medium">{quoteType ?? "N/A"}</div>;
+    },
+  },
   {
     accessorKey: "transaction_status",
     header: "Status",
