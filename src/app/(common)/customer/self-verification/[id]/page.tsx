@@ -151,9 +151,6 @@ const CustomerPremiumFinancingVerificationPage = () => {
     <section className=" flex-col gap-6 py-6">
       <WidthConstraint>
         <Card>
-          <CardHeader>
-            <CardTitle>Customer verification steps</CardTitle>
-          </CardHeader>
           <CardContent className="flex flex-col gap-6 md:flex-row">
             <div className="flex flex-col gap-6 md:flex-row p-5 w-full">
               <div className="w-full md:w-64 lg:max-h-[500px]">
@@ -203,8 +200,8 @@ const CustomerPremiumFinancingVerificationPage = () => {
 
                 {currentStep === 3 && (
                   <GhanaCardVerificationStep
-                    userEmail=""
-                    userPhone=""
+                    userEmail={premiumFinancing?.user?.email || ""}
+                    userPhone={premiumFinancing?.user?.phone || ""}
                     ghanaCardNumber={null}
                     onSuccess={async (
                       ghanaCardResponse,

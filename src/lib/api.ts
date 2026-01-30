@@ -89,9 +89,9 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     const isTokenExpiredError =
-      error.response?.status >= 400 &&
-      (error.response?.data?.message?.includes("Token") ||
-        !Cookies.get(COOKIE_KEYS.accessToken));
+      // error.response?.status >= 400 &&
+      error.response?.data?.message?.includes("Token") ||
+      !Cookies.get(COOKIE_KEYS.accessToken);
 
     if (isTokenExpiredError && !originalRequest._retry) {
       originalRequest._retry = true;
@@ -102,6 +102,7 @@ api.interceptors.response.use(
       try {
         if (!Cookies.get(COOKIE_KEYS.refreshToken)) {
           if (!skipLogout) {
+            console.log("running logout on first try");
             logout();
           }
           return Promise.reject(error);
@@ -115,12 +116,14 @@ api.interceptors.response.use(
         }
 
         if (!skipLogout) {
+          console.log("running logout on second try");
           logout();
         }
         return Promise.reject(error);
       } catch (refreshError) {
         console.error("Token refresh failed:", refreshError);
         if (!skipLogout) {
+          console.log("running logout");
           logout();
         }
         return Promise.reject(refreshError);

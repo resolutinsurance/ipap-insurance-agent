@@ -51,6 +51,11 @@ export const GhanaCardVerificationStep = ({
   const { videoRef, canvasRef, startCamera, stopCamera, captureSelfie } = useCamera();
   const ghanaCardNumberRef = useRef<string>("");
 
+  if (!userEmail || !userPhone) {
+    toast.error("User email and phone are required, please contact support");
+    return null;
+  }
+
   const verificationFlow = useVerificationFlow({
     userEmail,
     userPhone,
@@ -174,7 +179,7 @@ export const GhanaCardVerificationStep = ({
               onSuccess(
                 ghanaCardResponse,
                 verificationFlow.verificationId,
-                ghanaCardNumber,
+                ghanaCardNumber
               );
             } else {
               // This shouldn't happen due to UI logic, but add safeguard

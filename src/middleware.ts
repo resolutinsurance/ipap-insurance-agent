@@ -88,7 +88,7 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL(ROUTES.VERIFY_ID, request.url));
       }
       console.log("🔍 Base route - authenticated agent, redirecting to dashboard");
-      return NextResponse.redirect(new URL(ROUTES.AGENT.HOME, request.url));
+      return NextResponse.redirect(new URL(ROUTES.AGENT.FIND_POLICY, request.url));
     } else {
       console.log("🔍 Base route - not authenticated, redirecting to signin");
       return NextResponse.redirect(new URL(ROUTES.LOGIN, request.url));

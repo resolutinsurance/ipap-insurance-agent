@@ -151,7 +151,7 @@ export const useAuth = () => {
           window.location.href = ROUTES.VERIFY_ID;
         } else {
           // Verified, redirect to dashboard
-          window.location.href = ROUTES.AGENT.HOME;
+          window.location.href = ROUTES.AGENT.FIND_POLICY;
         }
       } else {
         // No role, logout
