@@ -21,10 +21,11 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ROUTES } from "@/lib/constants";
-import { cn, getNavigation, getSidebarTitle } from "@/lib/utils";
+import { cn, getNavigation } from "@/lib/utils";
 import { LogOutIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Logo from "./ui/logo";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -47,7 +48,7 @@ export function AppSidebar() {
       <SidebarHeader>
         <div className="flex items-center px-4">
           <Link href={ROUTES.AGENT.HOME} onClick={handleItemClick}>
-            <h2 className="text-xl font-bold">{getSidebarTitle(userType)}</h2>
+            <Logo />
           </Link>
         </div>
       </SidebarHeader>

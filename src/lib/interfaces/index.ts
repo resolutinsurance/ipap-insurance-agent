@@ -35,27 +35,33 @@ export interface Pagination {
 }
 
 export interface FinancialAccountingEntry {
-  id: string;
-  entity_code: string;
+  account_name: string;
   account_number: string;
-  transaction_channel: string;
-  inputter: string;
   authorizer: string;
-  transaction_type: string;
-  transaction_number: string;
-  transaction_date: string; // ISO date string
-  transaction_narration: string;
-  transaction_amount: string; // Consider using number if applicable
+  createdAt: string;
   currency: string;
+  entity_code: string;
+  exchange_rate: string;
+  id: string;
+  inputter: string;
   local_currency: string;
-  exchange_rate: string; // Consider using number if applicable
+  policyId: string;
+  quoteType: MainProductQuoteType;
+  transaction_amount: string;
+  transaction_channel: string;
+  transaction_date: string;
+  transaction_narration: string;
+  transaction_number: string;
   transaction_status: string;
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
+  transaction_type: string;
+  updatedAt: string;
+  userAgentID: string;
 }
 
 export interface TransactionJournalEntry {
   id: string;
+  policyId: string;
+  quoteType: MainProductQuoteType;
   transaction_number: string;
   debit_account: string | null;
   credit_account: string | null;

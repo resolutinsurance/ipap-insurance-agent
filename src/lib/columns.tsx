@@ -35,6 +35,19 @@ export const FINANCIAL_ENTRIES_COLUMNS: ColumnDef<FinancialAccountingEntry>[] = 
     },
   },
   {
+    accessorKey: "quoteType",
+    header: "Insurance Type",
+    cell: ({ row }) => {
+      const quoteType = row.original.quoteType;
+      return <div className="font-medium">{quoteType ?? "N/A"}</div>;
+    },
+  },
+  // {
+  //   accessorKey: "policyId",
+  //   header: "Policy ID",
+  //   cell: ({ row }) => <div className="font-medium">{row.getValue("policyId")}</div>,
+  // },
+  {
     accessorKey: "transaction_amount",
     header: "Amount",
     cell: ({ row }) => (
