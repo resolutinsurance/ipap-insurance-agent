@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAutoCalculatePremiumFinancing } from "@/hooks/use-premium-financing";
 import { MainProductQuoteType } from "@/lib/constants";
+import { DEFAULT_LOAN_DATA } from "@/lib/constants/payment-steps";
 import { PaymentFrequency } from "@/lib/interfaces";
 import { paymentVerificationAtom } from "@/lib/store";
 import type { PaymentVerificationState } from "@/lib/store/payment-verification";
+import { formatCurrencyToGHS } from "@/lib/utils";
 import { useAtom, WritableAtom } from "jotai";
 import React, { SetStateAction } from "react";
 
@@ -38,13 +40,8 @@ export function LoanCalculationStep({
   verificationAtom = paymentVerificationAtom,
 }: LoanCalculationStepProps) {
   const [paymentVerification, setPaymentVerification] = useAtom(verificationAtom);
-
   // Read initial values from Jotai state (directly, no session key)
-  const loanData = paymentVerification.loanData || {
-    initialDeposit: 0,
-    duration: 12,
-    paymentFrequency: "monthly",
-  };
+  const loanData = paymentVerification.loanData || DEFAULT_LOAN_DATA;
 
   const [initialDeposit, setInitialDeposit] = React.useState(loanData.initialDeposit);
   const [duration, setDuration] = React.useState(loanData.duration);
@@ -55,17 +52,9 @@ export function LoanCalculationStep({
   // Update Jotai state immediately when values change
   // Use functional update to avoid stale closure issues
   const updateLoanData = React.useCallback(
-    (updates: {
-      initialDeposit?: number;
-      duration?: number;
-      paymentFrequency?: PaymentFrequency;
-    }) => {
+    (updates: Partial<PaymentVerificationState["loanData"]>) => {
       setPaymentVerification((prev) => {
-        const currentLoanData = prev.loanData || {
-          initialDeposit: 0,
-          duration: 12,
-          paymentFrequency: "monthly",
-        };
+        const currentLoanData = prev.loanData || DEFAULT_LOAN_DATA;
         return {
           ...prev,
           loanData: {
@@ -116,6 +105,17 @@ export function LoanCalculationStep({
       </div>
 
       <div className="space-y-4">
+        <div className="p-4 bg-gray-50 rounded-lg space-y-2">
+          <h4 className="font-semibold text-sm">Premium Amount</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div className="text-sm">
+              <span className="text-gray-600">Net premium amount:</span>
+              <span className="font-medium ml-2">
+                {formatCurrencyToGHS(premiumAmount)}
+              </span>
+            </div>
+          </div>
+        </div>
         <DurationSelector value={duration} onChange={handleDurationChange} />
         <PaymentFrequencySelector
           value={paymentFrequency}
@@ -190,7 +190,6 @@ export function LoanCalculationStep({
 
             // Wait a tick to ensure state is persisted to sessionStorage
             await new Promise((resolve) => setTimeout(resolve, 100));
-
             // Then proceed to next step
             onNext();
           }}

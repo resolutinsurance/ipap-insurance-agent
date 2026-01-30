@@ -1,4 +1,5 @@
 import type { Step } from "@/components/ui/stepper";
+import { PaymentVerificationState } from "../store/payment-verification";
 
 /**
  * Individual step definitions for payment flows
@@ -132,4 +133,10 @@ export const getQuotePaymentSteps = (
   }
 
   return baseSteps;
+};
+
+export const DEFAULT_LOAN_DATA: NonNullable<PaymentVerificationState["loanData"]> = {
+  initialDeposit: 0,
+  duration: 10,
+  paymentFrequency: "monthly",
 };
