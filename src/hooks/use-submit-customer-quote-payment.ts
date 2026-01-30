@@ -258,6 +258,7 @@ export function useSubmitCustomerQuotePayment({
     isInstallment,
     installmentDuration,
     installmentPaymentFrequency,
+    verificationType,
     makeQuotePayment,
     customerPurchasePremiumFinancing,
     generatePDF,

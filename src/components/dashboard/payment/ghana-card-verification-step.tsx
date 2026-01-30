@@ -50,11 +50,8 @@ export const GhanaCardVerificationStep = ({
 }: GhanaCardVerificationStepProps) => {
   const { videoRef, canvasRef, startCamera, stopCamera, captureSelfie } = useCamera();
   const ghanaCardNumberRef = useRef<string>("");
-
-  if (!userEmail || !userPhone) {
-    toast.error("User email and phone are required, please contact support");
-    return null;
-  }
+  const hasRequiredUserInfo = Boolean(userEmail && userPhone);
+  const hasShownMissingInfoToastRef = useRef(false);
 
   const verificationFlow = useVerificationFlow({
     userEmail,
@@ -84,6 +81,13 @@ export const GhanaCardVerificationStep = ({
     confirmImage,
     isPending,
   } = verificationFlow;
+
+  useEffect(() => {
+    if (!hasRequiredUserInfo && !hasShownMissingInfoToastRef.current) {
+      hasShownMissingInfoToastRef.current = true;
+      toast.error("User email and phone are required, please contact support");
+    }
+  }, [hasRequiredUserInfo]);
 
   // Update ref whenever ghanaCardNumber changes
   useEffect(() => {
@@ -132,6 +136,10 @@ export const GhanaCardVerificationStep = ({
     }
     await confirmImage();
   };
+
+  if (!hasRequiredUserInfo) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
