@@ -20,6 +20,7 @@ import {
   MOBILE_MONEY_METHODS,
   PAYMENT_METHODS,
 } from "@/lib/constants";
+import { PaymentFrequency } from "@/lib/interfaces";
 import { paymentVerificationAtom } from "@/lib/store";
 import type { PaymentVerificationState } from "@/lib/store/payment-verification";
 import { useAtom, WritableAtom } from "jotai";
@@ -39,6 +40,13 @@ interface PaymentDetailsStepProps {
     [SetStateAction<PaymentVerificationState>],
     void
   >;
+  loanCalculationData?: {
+    initialDeposit: number;
+    duration: number;
+    paymentFrequency: PaymentFrequency;
+    loanAmount: number;
+    actualProcessingFee: number;
+  };
 }
 
 export function PaymentDetailsStep({
@@ -50,6 +58,7 @@ export function PaymentDetailsStep({
   onCancel,
   isLoading = false,
   verificationAtom = paymentVerificationAtom,
+  loanCalculationData,
 }: PaymentDetailsStepProps) {
   console.log(selectedCompanyId, quoteType);
   const [paymentVerification, setPaymentVerification] = useAtom(verificationAtom);
@@ -425,8 +434,12 @@ export function PaymentDetailsStep({
         </div>
         <PaymentSummary
           paymentData={paymentData}
-          actualProcessingFee={loanData?.actualProcessingFee || 0}
-          initialDeposit={loanData?.initialDeposit || 0}
+          actualProcessingFee={
+            loanData?.actualProcessingFee || loanCalculationData?.actualProcessingFee || 0
+          }
+          initialDeposit={
+            loanData?.initialDeposit || loanCalculationData?.initialDeposit || 0
+          }
         />
       </div>
 

@@ -60,7 +60,13 @@ export async function POST(request: NextRequest) {
       }
     );
 
-    await page.goto(urlObj.toString(), { waitUntil: "networkidle0" });
+    await page.goto(urlObj.toString(), {
+      waitUntil: "load",
+      timeout: 0,
+    });
+
+    // optional settle time (safe in all versions)
+    await new Promise((res) => setTimeout(res, 300));
 
     const buffer = await page.pdf({
       waitForFonts: true,

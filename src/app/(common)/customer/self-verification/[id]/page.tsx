@@ -245,6 +245,16 @@ const CustomerPremiumFinancingVerificationPage = () => {
                   (productTypeParam ? (
                     isGhanaVerified && isDeclarationAccepted ? (
                       <PaymentDetailsStep
+                        loanCalculationData={{
+                          initialDeposit: Number(premiumFinancing?.initialDeposit ?? "0"),
+                          duration: premiumFinancing?.duration ?? 0,
+                          paymentFrequency:
+                            premiumFinancing?.paymentFrequency ?? "monthly",
+                          loanAmount: Number(premiumFinancing?.loanAmount ?? "0"),
+                          actualProcessingFee: Number(
+                            premiumFinancing?.ProcessingFeeValue ?? "0"
+                          ),
+                        }}
                         premiumAmount={premiumAmount}
                         selectedCompanyId={premiumFinancing?.companyID || ""}
                         quoteType={productTypeParam}

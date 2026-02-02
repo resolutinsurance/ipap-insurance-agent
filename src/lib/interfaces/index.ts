@@ -1604,6 +1604,8 @@ export interface PaymentSchedule {
   loanAmount: string;
   premiumAmount: string;
   OriginalPremium?: string;
+  ProcessingFeeValue: string;
+  ProcessingFees: string;
   regularInstallment?: string;
   minimumInitialDeposit?: string;
   interestPerInstallment?: string;

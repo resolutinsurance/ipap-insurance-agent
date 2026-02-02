@@ -103,7 +103,10 @@ const QuotePaymentContractPage = () => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div
+        className="flex items-center justify-center min-h-[400px]"
+        data-pdf-ready="true"
+      >
         <Card className="max-w-md">
           <CardContent className="p-6">
             <div className="text-center">
@@ -122,7 +125,10 @@ const QuotePaymentContractPage = () => {
 
   if (!paymentRecord) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div
+        className="flex items-center justify-center min-h-[400px]"
+        data-pdf-ready="true"
+      >
         <div className="text-center">
           <p className="text-muted-foreground">
             No payment record found. Please check the payment ID.
@@ -133,7 +139,7 @@ const QuotePaymentContractPage = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8" data-pdf-ready="true">
       {/* Header Section - PREMIUMSHIELD LOAN PRODUCT FORM */}
       <ContractHeader
         productName="PremiumShield"

@@ -33,6 +33,12 @@ const PaymentSummary = ({
           <span className="font-medium ml-2">{paymentData.accountName}</span>
         </div>
         <div className="text-sm">
+          <span className="text-gray-600">Processing Fee:</span>
+          <span className="font-medium ml-2">
+            {formatCurrencyToGHS(actualProcessingFee)}
+          </span>
+        </div>
+        <div className="text-sm">
           <span className="text-gray-600">Total Amount to Pay:</span>
           <span className="font-medium ml-2">
             {formatCurrencyToGHS(calculateCharges(actualProcessingFee, initialDeposit))}

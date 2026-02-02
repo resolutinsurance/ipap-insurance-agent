@@ -5,7 +5,20 @@ import { useMutation } from "@tanstack/react-query";
  * Encode data as base64 for URL
  */
 function encodeData(data: unknown): string {
-  return Buffer.from(JSON.stringify(data)).toString("base64");
+  const json = JSON.stringify(data);
+
+  // Prefer Node's Buffer when available (SSR / some runtimes)
+  const maybeBuffer = (globalThis as unknown as { Buffer?: typeof Buffer }).Buffer;
+  if (maybeBuffer) {
+    return maybeBuffer.from(json, "utf-8").toString("base64");
+  }
+
+  // Browser-safe base64 for UTF-8 strings
+  // btoa only supports latin1, so we encode as UTF-8 first.
+  const utf8 = encodeURIComponent(json).replace(/%([0-9A-F]{2})/g, (_, p1) =>
+    String.fromCharCode(parseInt(p1, 16))
+  );
+  return btoa(utf8);
 }
 
 type GeneratePDFOptions = {

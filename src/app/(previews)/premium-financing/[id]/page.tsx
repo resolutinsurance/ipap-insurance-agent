@@ -14,9 +14,9 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const PremiumFinancingContractPage = () => {
-  const { id, type } = useParams();
-  const verificationType = type?.toString() || "";
+  const { id } = useParams();
   const searchParams = useSearchParams();
+  const verificationType = searchParams.get("type") || "";
   const { user } = useAuth();
   const financingId = id?.toString() || "";
 
@@ -42,7 +42,12 @@ const PremiumFinancingContractPage = () => {
         const accessToken =
           searchParams.get("authorization") || Cookies.get(COOKIE_KEYS.accessToken);
 
-        const response = await fetch(`${API_BASE_URL}/PremiumFinancing/${financingId}`, {
+        // Remote verification links are public: use the dedicated public endpoint.
+        const endpoint = isRemoteVerification
+          ? `${API_BASE_URL}/PremiumFinancing/remote-verification/${financingId}`
+          : `${API_BASE_URL}/PremiumFinancing/${financingId}`;
+
+        const response = await fetch(endpoint, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -95,7 +100,10 @@ const PremiumFinancingContractPage = () => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div
+        className="flex items-center justify-center min-h-[400px]"
+        data-pdf-ready="true"
+      >
         <Card className="max-w-md">
           <CardContent className="p-6">
             <div className="text-center">
@@ -114,7 +122,10 @@ const PremiumFinancingContractPage = () => {
 
   if (!paymentSchedule) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div
+        className="flex items-center justify-center min-h-[400px]"
+        data-pdf-ready="true"
+      >
         <div className="text-center">
           <p className="text-muted-foreground">
             No premium financing details found. Please check the financing ID.
@@ -125,7 +136,7 @@ const PremiumFinancingContractPage = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8" data-pdf-ready="true">
       {/* Header Section - PREMIUMSHIELD LOAN PRODUCT FORM */}
       <ContractHeader
         productName="PremiumShield"
