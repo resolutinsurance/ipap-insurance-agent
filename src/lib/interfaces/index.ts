@@ -1782,6 +1782,7 @@ export interface PremiumFinancingScheduleRequest {
   loanAmount: string;
   noofInstallments: number;
   paymentFrequency: PaymentFrequency;
+  premiumFinancingId?: string;
 }
 
 export type PaymentFrequency = "daily" | "weekly" | "monthly";

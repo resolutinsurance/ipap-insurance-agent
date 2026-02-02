@@ -186,6 +186,7 @@ const CustomerPremiumFinancingVerificationPage = () => {
                         loanAmount: String(premiumFinancing?.loanAmount ?? "0"),
                         noofInstallments: Number(premiumFinancing?.noofInstallments ?? 0),
                         paymentFrequency: premiumFinancing?.paymentFrequency || "monthly",
+                        premiumFinancingId: financingId,
                       }}
                       onNext={() => setCurrentStep(3)}
                       onCancel={() => setCurrentStep(1)}

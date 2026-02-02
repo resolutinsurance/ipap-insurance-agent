@@ -476,6 +476,7 @@ export const useDirectPremiumFinancingSchedule = (paymentData?: {
   loanAmount: string;
   noofInstallments: number;
   paymentFrequency: "daily" | "weekly" | "monthly";
+  premiumFinancingId?: string;
 }) => {
   const premiumFinancingScheduleQuery = useQuery({
     queryKey: ["get-direct-premium-financing-schedule", paymentData],
@@ -483,11 +484,21 @@ export const useDirectPremiumFinancingSchedule = (paymentData?: {
       if (!paymentData) {
         throw new Error("Missing payment data for direct schedule");
       }
-      const response = await getDirectPremiumFinancingSchedule(paymentData);
-      if (!response) {
-        throw new Error("No data received from getDirectPremiumFinancingSchedule");
+      if (paymentData.premiumFinancingId) {
+        const response = await getPremiumFinancingSchedule(
+          paymentData.premiumFinancingId
+        );
+        if (!response) {
+          throw new Error("No data received from getPremiumFinancingSchedule");
+        }
+        return response;
+      } else {
+        const response = await getDirectPremiumFinancingSchedule(paymentData);
+        if (!response) {
+          throw new Error("No data received from getDirectPremiumFinancingSchedule");
+        }
+        return response;
       }
-      return response;
     },
     enabled: !!paymentData?.paymentFrequency && !!paymentData.noofInstallments,
   });
