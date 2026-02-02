@@ -13,21 +13,24 @@ import {
   type ProductTypeForPremium,
 } from "@/hooks/use-quote-premium-amount";
 import { AGENT_REMOTE_PREMIUM_FINANCING_STEPS } from "@/lib/constants";
-import { paymentVerificationAtom } from "@/lib/store";
+import { remotePremiumFinancingAtom } from "@/lib/store";
 import { transformProductTypeToQuoteType } from "@/lib/utils";
 import { convertDurationForPaymentFrequency } from "@/lib/utils/payments";
+import { goToStepInUrl } from "@/lib/utils/step-navigation";
 import { useAtom } from "jotai";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { toast } from "sonner";
 
 const AgentRemotePremiumFinancingPage = () => {
   const searchParams = useSearchParams();
-  const [paymentVerification] = useAtom(paymentVerificationAtom);
+  const pathname = usePathname();
+  const router = useRouter();
+  const [paymentVerification] = useAtom(remotePremiumFinancingAtom);
   const { setupPremiumFinancing } = useSetupPremiumFinancing();
   const { agent } = useAgent();
 
-  const [currentStep, setCurrentStep] = React.useState<1 | 2 | 3>(1);
+  const currentStep = (Number(searchParams.get("step") || "1") || 1) as 1 | 2 | 3;
   const [linkSent, setLinkSent] = React.useState(false);
   const [clientLink, setClientLink] = React.useState<string | null>(null);
 
@@ -54,6 +57,16 @@ const AgentRemotePremiumFinancingPage = () => {
       </div>
     );
   }
+
+  const goToStep = (step: number) => {
+    goToStepInUrl({
+      router,
+      pathname,
+      searchParams,
+      step,
+      maxStep: 3,
+    });
+  };
 
   const handleGenerateLink = async () => {
     const loanData = paymentVerification.loanData;
@@ -124,7 +137,8 @@ const AgentRemotePremiumFinancingPage = () => {
                 <LoanCalculationStep
                   premiumAmount={premiumAmount}
                   quoteType={transformProductTypeToQuoteType(productType)}
-                  onNext={() => setCurrentStep(2)}
+                  verificationAtom={remotePremiumFinancingAtom}
+                  onNext={() => goToStep(2)}
                   onCancel={() => window.history.back()}
                   nextButtonLabel="Proceed to next"
                 />
@@ -151,8 +165,8 @@ const AgentRemotePremiumFinancingPage = () => {
                       paymentFrequency:
                         paymentVerification.loanData?.paymentFrequency || "monthly",
                     }}
-                    onNext={() => setCurrentStep(3)}
-                    onCancel={() => setCurrentStep(1)}
+                    onNext={() => goToStep(3)}
+                    onCancel={() => goToStep(1)}
                   />
                 ) : (
                   <div className="text-center py-6 sm:py-8">
@@ -166,7 +180,7 @@ const AgentRemotePremiumFinancingPage = () => {
                 <CustomerVerificationLinkStep
                   linkSent={linkSent}
                   onGenerateLink={handleGenerateLink}
-                  onCancel={() => setCurrentStep(2)}
+                  onCancel={() => goToStep(2)}
                   clientLink={clientLink}
                   isGenerating={setupPremiumFinancing.isPending}
                 />

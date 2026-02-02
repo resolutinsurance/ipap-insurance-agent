@@ -76,3 +76,29 @@ export function convertBase64ToFile(base64String: string, fileName = "image"): F
     throw error; // fail loudly instead of creating broken files
   }
 }
+
+export const isDocumentFile = (file: File | string) => {
+  if (file instanceof File) {
+    return (
+      file.type.includes("pdf") ||
+      file.type.includes("msword") ||
+      file.type.includes("wordprocessingml")
+    );
+  }
+  return (
+    file.toLowerCase().endsWith(".pdf") ||
+    file.toLowerCase().endsWith(".doc") ||
+    file.toLowerCase().endsWith(".docx")
+  );
+};
+
+export function isDataUrl(value: string) {
+  return value.startsWith("data:") && value.includes(";base64,");
+}
+
+export function extractFilename(value: string) {
+  // Supports full URLs and simple paths/filenames.
+  const withoutQuery = value.split("?")[0]?.split("#")[0] ?? value;
+  const lastSegment = withoutQuery.split("/").filter(Boolean).pop();
+  return lastSegment ?? null;
+}

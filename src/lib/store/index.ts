@@ -30,4 +30,5 @@ export {
   getDefaultPaymentVerificationState,
   loyaltyPaymentVerificationAtom,
   paymentVerificationAtom,
+  remotePremiumFinancingAtom,
 } from "./payment-verification";

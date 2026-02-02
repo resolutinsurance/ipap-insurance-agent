@@ -1,108 +1,72 @@
+import { isDocumentFile } from "@/lib/utils/file-utils";
 import { FileText, Upload, X } from "lucide-react";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 
 interface ImagePickerProps {
   id: string;
   label: string;
   value: File | string | null;
-  src?: string; // URL for remote files
   onChange: (file: File | null) => void;
   disabled?: boolean;
   accept?: string;
   className?: string;
-  required?: boolean; // Whether the field is required
+  required?: boolean;
 }
 
 const ImagePicker: React.FC<ImagePickerProps> = ({
   id,
   label,
   value,
-  src,
   onChange,
   disabled = false,
   accept = "image/*",
   className = "",
   required = false,
 }) => {
-  const [preview, setPreview] = useState<string | null>(null);
-  const [isDocument, setIsDocument] = useState(false);
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL + "/uploads/";
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const isDocumentFile = (file: File | string) => {
-    if (file instanceof File) {
-      return (
-        file.type.includes("pdf") ||
-        file.type.includes("msword") ||
-        file.type.includes("wordprocessingml")
-      );
+  const { previewUrl, isDocument, objectUrlToRevoke } = useMemo(() => {
+    if (!value) {
+      return { previewUrl: null, isDocument: false, objectUrlToRevoke: null };
     }
-    const fileName = file.toLowerCase();
-    return (
-      fileName.endsWith(".pdf") || fileName.endsWith(".doc") || fileName.endsWith(".docx")
-    );
-  };
 
-  // Create preview URL when value changes
+    const isDoc = isDocumentFile(value);
+    if (isDoc) {
+      return { previewUrl: null, isDocument: true, objectUrlToRevoke: null };
+    }
 
+    if (value instanceof File) {
+      const url = URL.createObjectURL(value);
+      return { previewUrl: url, isDocument: false, objectUrlToRevoke: url };
+    }
+
+    return { previewUrl: value, isDocument: false, objectUrlToRevoke: null };
+  }, [value]);
+
+  // Cleanup for object URLs created from File inputs.
   useEffect(() => {
-    if (value) {
-      if (value instanceof File) {
-        const isDoc = isDocumentFile(value);
-        setIsDocument(isDoc);
-        if (!isDoc) {
-          const previewUrl = URL.createObjectURL(value);
-          setPreview(previewUrl);
-          return () => {
-            URL.revokeObjectURL(previewUrl);
-          };
-        }
-      } else if (typeof value === "string") {
-        const isDoc = isDocumentFile(value);
-        setIsDocument(isDoc);
-        if (!isDoc) {
-          setPreview(baseUrl + value);
-        }
-      }
-    } else if (src) {
-      const isDoc = isDocumentFile(src);
-      setIsDocument(isDoc);
-      if (!isDoc) {
-        setPreview(baseUrl + src);
-      }
-    } else {
-      setPreview(null);
-      setIsDocument(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, src]);
+    return () => {
+      if (objectUrlToRevoke) URL.revokeObjectURL(objectUrlToRevoke);
+    };
+  }, [objectUrlToRevoke]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0] || null;
     onChange(file);
-    // Reset the input value so the same file can be selected again if needed
-    if (event.target) {
-      event.target.value = "";
-    }
+    event.target.value = "";
   };
 
   const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering the parent click
+    e.stopPropagation();
     onChange(null);
-    if (src) {
-      setPreview(null);
-    }
   };
 
-  const handleUploadClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+  const handleClick = () => {
+    if (!disabled) fileInputRef.current?.click();
   };
 
-  // Determine if the field is required based on the required prop and src presence
-  const isRequired = required && !src;
+  const hasContent = previewUrl || isDocument;
 
   return (
     <div className={`flex relative flex-col gap-3 ${className}`}>
@@ -110,19 +74,8 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
         className={`border-2 border-dashed rounded-xl p-6 text-center relative cursor-pointer ${
           disabled ? "opacity-50 cursor-not-allowed" : ""
         }`}
-        onClick={disabled ? undefined : handleUploadClick}
+        onClick={handleClick}
       >
-        {(preview || isDocument) && (
-          <button
-            type="button"
-            onClick={handleRemove}
-            className="bg-red-500 absolute top-2 right-2 hover:bg-red-600 text-white rounded-full  p-1 flex items-center gap-1"
-            disabled={disabled}
-            title="Remove"
-          >
-            <X size={16} />
-          </button>
-        )}
         <input
           type="file"
           id={id}
@@ -131,33 +84,38 @@ const ImagePicker: React.FC<ImagePickerProps> = ({
           accept={accept}
           onChange={handleFileChange}
           disabled={disabled}
-          required={isRequired}
+          required={required}
         />
 
-        {preview ? (
-          <div className="relative">
-            <Image
-              src={preview}
-              alt={label}
-              className="max-h-48 mx-auto rounded-md"
-              width={100}
-              height={100}
-            />
-          </div>
+        {hasContent && (
+          <button
+            type="button"
+            onClick={handleRemove}
+            className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1"
+            disabled={disabled}
+          >
+            <X size={16} />
+          </button>
+        )}
+
+        {previewUrl ? (
+          <Image
+            src={previewUrl}
+            alt={label}
+            className="max-h-48 mx-auto rounded-md object-contain"
+            width={1500}
+            height={300}
+          />
         ) : isDocument ? (
-          <div className="flex flex-col items-center justify-center">
-            <FileText className="mb-2 text-gray-500" size={120} />
-            <p className="text-muted-foreground">
-              {label}
-              {isRequired && <span className="text-red-500 ml-1">*</span>}
-            </p>
+          <div className="flex flex-col items-center">
+            <FileText className="text-gray-500" size={120} />
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center">
-            <Upload className="mb-2 text-gray-500" size={24} />
-            <p className="text-muted-foreground">
+          <div className="flex flex-col items-center gap-2">
+            <Upload className="text-gray-400" size={32} />
+            <p className="text-sm text-muted-foreground">
               {label}
-              {isRequired && <span className="text-red-500 ml-1">*</span>}
+              {required && <span className="text-red-500 ml-1">*</span>}
             </p>
           </div>
         )}

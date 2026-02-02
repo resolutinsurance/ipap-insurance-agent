@@ -21,6 +21,7 @@ import {
 } from "@/lib/store";
 import type { PaymentVerificationState } from "@/lib/store/payment-verification";
 import { transformProductTypeToQuoteType } from "@/lib/utils";
+import { goToStepInUrl } from "@/lib/utils/step-navigation";
 import { useAtom } from "jotai";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
@@ -146,9 +147,13 @@ const PaymentDirectPage = () => {
       !isVerificationComplete &&
       !justVerified
     ) {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("step", "1");
-      router.replace(`${pathname}?${params.toString()}`);
+      goToStepInUrl({
+        router,
+        pathname,
+        searchParams,
+        step: 1,
+        maxStep: steps.length,
+      });
     }
   }, [
     currentStep,
@@ -158,6 +163,7 @@ const PaymentDirectPage = () => {
     pathname,
     router,
     searchParams,
+    steps.length,
   ]);
 
   // Determine which step index corresponds to which action
@@ -187,16 +193,23 @@ const PaymentDirectPage = () => {
 
   const goToStep = (step: number) => {
     if (step > 1 && !isVerificationComplete && !justVerified) {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("step", "1");
-      router.replace(`${pathname}?${params.toString()}`);
+      goToStepInUrl({
+        router,
+        pathname,
+        searchParams,
+        step: 1,
+        maxStep: steps.length,
+      });
       return;
     }
 
-    const nextStep = Math.max(1, Math.min(step, steps.length));
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("step", String(nextStep));
-    router.replace(`${pathname}?${params.toString()}`);
+    goToStepInUrl({
+      router,
+      pathname,
+      searchParams,
+      step,
+      maxStep: steps.length,
+    });
   };
 
   return (
@@ -223,7 +236,12 @@ const PaymentDirectPage = () => {
                     <GhanaCardVerificationStep
                       userEmail={verificationUser.email}
                       userPhone={verificationUser.phone}
-                      ghanaCardNumber={verificationUser.GhcardNo}
+                      ghanaCardNumber={
+                        quoteVerificationState.ghanaCardNumber ||
+                        verificationUser.GhcardNo
+                      }
+                      verificationId={quoteVerificationState.ghanaCardId}
+                      ghanaCardResponse={quoteVerificationState.ghanaCardResponse}
                       onSuccess={(ghanaCardResponse, verificationId, ghanaCardNumber) => {
                         setJustVerified(true);
                         setDirectVerification((prev) => ({

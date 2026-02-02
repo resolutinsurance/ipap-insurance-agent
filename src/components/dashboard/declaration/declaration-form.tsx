@@ -9,9 +9,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import SignaturePad from "@/components/ui/signature-pad";
 import { useUploadSingleFile } from "@/hooks/use-file-upload";
+import { DECLARATION_ITEMS } from "@/lib/constants";
 import { Declaration } from "@/lib/interfaces";
 import { PaymentVerificationState } from "@/lib/store/payment-verification";
-import { convertBase64ToFile } from "@/lib/utils/file-utils";
+import { convertBase64ToFile, extractFilename, isDataUrl } from "@/lib/utils/file-utils";
 import React from "react";
 import { toast } from "sonner";
 
@@ -83,50 +84,46 @@ export function DeclarationForm({
       return;
     }
 
-    // Get signature data - prioritize current signature from component, but fall back to initialSignature if available
-    let signature = currentSignature;
-
-    // If no signature from component, check if we have a saved signature
-    if (!signature && initialSignature) {
-      signature = initialSignature;
-    }
-
-    if (!signature) {
+    const signature: File | string | null = currentSignature ?? initialSignature ?? null;
+    if (signature == null) {
       toast.error("Please provide a signature to continue");
       return;
     }
 
-    // Start loading immediately before any async operations
     setIsSubmitting(true);
 
     try {
-      // Convert signature to File if it's a base64 string (from signature pad)
-      let signatureFile: File;
-      if (signature instanceof File) {
-        signatureFile = signature;
-      } else {
-        // Convert base64 string (SVG from pad) to File
-        signatureFile = convertBase64ToFile(signature, "signature");
+      const acceptWithFilename = async (signatureFilename: string) => {
+        await updateVerificationState?.({ signatureFilename });
+        toast.success("Declaration accepted successfully");
+        await onSuccess(signatureFilename);
+      };
+
+      const resolveExistingFilename = (sig: string): string | null => {
+        if (isDataUrl(sig)) return null;
+        return extractFilename(sig);
+      };
+
+      // If we already have a stored/remote signature (URL or filename), don't re-upload it.
+      if (typeof signature === "string") {
+        const existingFilename = resolveExistingFilename(signature);
+        if (existingFilename) {
+          await acceptWithFilename(existingFilename);
+          return;
+        }
       }
 
-      // Upload signature file to API
+      const signatureFile =
+        signature instanceof File
+          ? signature
+          : convertBase64ToFile(signature, "signature");
+
       const uploadResponse = await uploadFileMutation.mutateAsync(signatureFile);
-
-      // Extract originalname from API response
-      const signatureFilename = uploadResponse.message[0]?.originalname;
-
-      if (!signatureFilename) {
+      const uploadedFilename = uploadResponse.message[0]?.originalname;
+      if (!uploadedFilename)
         throw new Error("Failed to get filename from upload response");
-      }
 
-      // Now save the signature filename to state (only when Continue is pressed)
-      if (updateVerificationState) {
-        await updateVerificationState({ signatureFilename });
-      }
-
-      toast.success("Declaration accepted successfully");
-      // Pass the filename to onSuccess and await it to ensure parent's async operations complete
-      await onSuccess(signatureFilename);
+      await acceptWithFilename(uploadedFilename);
     } catch (error) {
       console.error("Error submitting declaration:", error);
       toast.error("Failed to accept declaration. Please try again.");
@@ -164,90 +161,20 @@ export function DeclarationForm({
         </div>
 
         <div className="space-y-3">
-          <div className="flex items-start space-x-3">
-            <Checkbox
-              id="termsAndConditions"
-              checked={declarations.termsAndConditions}
-              onCheckedChange={(checked) =>
-                handleDeclarationChange("termsAndConditions", checked as boolean)
-              }
-            />
-            <Label htmlFor="termsAndConditions" className="text-sm">
-              I have read and understood the premium financing (loan) terms and
-              conditions.
-            </Label>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <Checkbox
-              id="dataProcessing"
-              checked={declarations.dataProcessing}
-              onCheckedChange={(checked) =>
-                handleDeclarationChange("dataProcessing", checked as boolean)
-              }
-            />
-            <Label htmlFor="dataProcessing" className="text-sm">
-              I consent to the processing of my personal data for loan administration,
-              verification, and payment processing.
-            </Label>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <Checkbox
-              id="insuranceTerms"
-              checked={declarations.insuranceTerms}
-              onCheckedChange={(checked) =>
-                handleDeclarationChange("insuranceTerms", checked as boolean)
-              }
-            />
-            <Label htmlFor="insuranceTerms" className="text-sm">
-              I understand this is a loan to finance my insurance premium, and that the
-              insurance policy terms are separate from this loan agreement.
-            </Label>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <Checkbox
-              id="premiumPayment"
-              checked={declarations.premiumPayment}
-              onCheckedChange={(checked) =>
-                handleDeclarationChange("premiumPayment", checked as boolean)
-              }
-            />
-            <Label htmlFor="premiumPayment" className="text-sm">
-              I authorize payment of the insurance premium and I agree to repay the loan
-              according to the repayment schedule.
-            </Label>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <Checkbox
-              id="createAccount"
-              checked={declarations.createAccount}
-              onCheckedChange={(checked) =>
-                handleDeclarationChange("createAccount", checked as boolean)
-              }
-            />
-            <Label htmlFor="createAccount" className="text-sm">
-              I authorize Globafin to create an account on my behalf using the information
-              provided if I do not already have an existing account and wish to apply for
-              a loan
-            </Label>
-          </div>
-
-          <div className="flex items-start space-x-3">
-            <Checkbox
-              id="policyValidity"
-              checked={declarations.policyValidity}
-              onCheckedChange={(checked) =>
-                handleDeclarationChange("policyValidity", checked as boolean)
-              }
-            />
-            <Label htmlFor="policyValidity" className="text-sm">
-              I confirm that the information provided for this premium financing request
-              is accurate and complete.
-            </Label>
-          </div>
+          {DECLARATION_ITEMS.map(({ key, label }) => (
+            <div key={key} className="flex items-start space-x-3">
+              <Checkbox
+                id={key}
+                checked={declarations[key]}
+                onCheckedChange={(checked) =>
+                  handleDeclarationChange(key, checked as boolean)
+                }
+              />
+              <Label htmlFor={key} className="text-sm">
+                {label}
+              </Label>
+            </div>
+          ))}
         </div>
       </div>
 

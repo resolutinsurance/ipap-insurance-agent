@@ -1,12 +1,11 @@
 "use client";
 
-import PreviewPremiumFinancingDetails from "@/components/dashboard/agent/preview-premium-financing-details";
 import { DeclarationForm } from "@/components/dashboard/declaration/declaration-form";
 import ApprovalScreen from "@/components/dashboard/payment/approval-screen";
 import { GhanaCardVerificationStep } from "@/components/dashboard/payment/ghana-card-verification-step";
 import { PaymentDetailsStep } from "@/components/dashboard/payment/payment-details-step";
 import { RepaymentSchedulePreviewStep } from "@/components/dashboard/payment/repayment-schedule-preview-step";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Stepper, type Step } from "@/components/ui/stepper";
 import WidthConstraint from "@/components/ui/width-constraint";
 import {
@@ -21,13 +20,17 @@ import {
 } from "@/lib/constants";
 import { customerSelfVerificationAtom } from "@/lib/store";
 import type { PaymentVerificationState } from "@/lib/store/payment-verification";
+import { goToStepInUrl } from "@/lib/utils/step-navigation";
 import { useAtom } from "jotai";
-import { useParams, useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 
 const CustomerPremiumFinancingVerificationPage = () => {
   const params = useParams();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
   // Decode the token from URL to handle URL-encoded characters (e.g., %3A -> :)
   const rawToken = params?.id as string;
   const token = rawToken ? decodeURIComponent(rawToken) : "";
@@ -37,7 +40,7 @@ const CustomerPremiumFinancingVerificationPage = () => {
     customerSelfVerificationAtom
   );
 
-  const [currentStep, setCurrentStep] = React.useState(1);
+  const currentStep = Number(searchParams.get("step") || "1") || 1;
   const [approvalDetails, setApprovalDetails] = React.useState<{
     paymentId: string;
     network: string;
@@ -76,6 +79,35 @@ const CustomerPremiumFinancingVerificationPage = () => {
   const isDeclarationAccepted = customerVerification.declarationAccepted;
   const signatureFilename = customerVerification.signatureFilename;
   const declarations = customerVerification.declarations;
+  const savedGhanaCardNumber = customerVerification.ghanaCardNumber ?? null;
+
+  const goToStep = (step: number) => {
+    goToStepInUrl({
+      router,
+      pathname,
+      searchParams,
+      step,
+      maxStep: 6,
+    });
+  };
+
+  // Ensure sessionStorage state is scoped per financingId so opening a new customer link
+  // doesn't reuse stale data from a previous customer verification session.
+  React.useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!financingId) return;
+    const contextKey = "customer-self-verification-context";
+    const existing = sessionStorage.getItem(contextKey);
+    if (existing && existing !== financingId) {
+      // Reset state when switching to a different financing link within the same browser session
+      setCustomerVerification({
+        ghanaCardResponse: null,
+        ghanaVerified: false,
+        declarationAccepted: false,
+      });
+    }
+    sessionStorage.setItem(contextKey, financingId);
+  }, [financingId, setCustomerVerification]);
 
   // Update verification state helper
   const updateVerificationState = React.useCallback(
@@ -92,6 +124,9 @@ const CustomerPremiumFinancingVerificationPage = () => {
           signatureFilename: updates.signatureFilename ?? prev.signatureFilename,
           ghanaCardId: updates.ghanaCardId ?? prev.ghanaCardId,
           ghanaCardNumber: updates.ghanaCardNumber ?? prev.ghanaCardNumber,
+          loanCalculated: updates.loanCalculated ?? prev.loanCalculated,
+          loanData: updates.loanData ?? prev.loanData,
+          ghanaCardResponse: updates.ghanaCardResponse ?? prev.ghanaCardResponse,
         };
       });
     },
@@ -113,7 +148,8 @@ const CustomerPremiumFinancingVerificationPage = () => {
     });
   if (decryptPremiumFinancing.isPending && !decryptPremiumFinancing.data) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
         <p className="text-sm text-muted-foreground">
           Preparing your verification link...
         </p>
@@ -122,30 +158,11 @@ const CustomerPremiumFinancingVerificationPage = () => {
   }
 
   if (!entityId || !financingId) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle>Invalid verification link</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              We couldn&apos;t find the premium financing details for this link. It may be
-              invalid or expired. Please contact your insurance agent for a new link.
-            </p>
-            {decryptPremiumFinancing.error && (
-              <p className="mt-2 text-xs text-red-500">
-                {decryptPremiumFinancing.error.message ||
-                  "Unable to decrypt verification token."}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return null;
   }
 
-  const steps: Step[] = CUSTOMER_SELF_VERIFICATION_STEPS;
+  // Drop the redundant "Preview details" step for customers (repayment step already has the data).
+  const steps: Step[] = CUSTOMER_SELF_VERIFICATION_STEPS.slice(1);
 
   return (
     <section className=" flex-col gap-6 py-6">
@@ -157,26 +174,9 @@ const CustomerPremiumFinancingVerificationPage = () => {
                 <Stepper steps={steps} currentStep={currentStep} className="h-auto" />
               </div>
 
-              <div className="flex-1 space-y-4">
-                {currentStep === 1 && (
-                  <PreviewPremiumFinancingDetails
-                    id={financingId}
-                    onNext={(loanData) => {
-                      if (loanData) {
-                        setCustomerVerification((prev) => ({
-                          ...prev,
-                          loanCalculated: true,
-                          loanData,
-                        }));
-                      }
-                      setCurrentStep(2);
-                    }}
-                    onCancel={() => setCurrentStep(1)}
-                  />
-                )}
-
-                {/* Repayment Schedule Preview Step - Now Step 2 */}
-                {currentStep === 2 &&
+              <div className="flex-1 space-y-4 max-w-2xl mx-auto">
+                {/* Repayment Schedule Preview Step - Step 1 */}
+                {currentStep === 1 &&
                   (financingId ? (
                     <RepaymentSchedulePreviewStep
                       paymentData={{
@@ -188,8 +188,32 @@ const CustomerPremiumFinancingVerificationPage = () => {
                         paymentFrequency: premiumFinancing?.paymentFrequency || "monthly",
                         premiumFinancingId: financingId,
                       }}
-                      onNext={() => setCurrentStep(3)}
-                      onCancel={() => setCurrentStep(1)}
+                      onNext={() => {
+                        if (premiumFinancing) {
+                          setCustomerVerification((prev) => ({
+                            ...prev,
+                            loanCalculated: true,
+                            loanData: {
+                              initialDeposit: Number(
+                                premiumFinancing?.initialDeposit ?? "0"
+                              ),
+                              loanAmount: Number(premiumFinancing?.loanAmount ?? "0"),
+                              totalRepayment: Number(
+                                premiumFinancing?.totalRepayment ?? "0"
+                              ),
+                              totalPaid: Number(premiumFinancing?.totalPaid ?? "0"),
+                              noofInstallments: Number(
+                                premiumFinancing?.noofInstallments ?? 0
+                              ),
+                              duration: Number(premiumFinancing?.duration ?? 0),
+                              paymentFrequency:
+                                premiumFinancing?.paymentFrequency || "monthly",
+                            },
+                          }));
+                        }
+                        goToStep(2);
+                      }}
+                      onCancel={() => goToStep(1)}
                     />
                   ) : (
                     <div className="text-center py-6 sm:py-8">
@@ -199,11 +223,13 @@ const CustomerPremiumFinancingVerificationPage = () => {
                     </div>
                   ))}
 
-                {currentStep === 3 && (
+                {currentStep === 2 && (
                   <GhanaCardVerificationStep
                     userEmail={premiumFinancing?.user?.email || ""}
                     userPhone={premiumFinancing?.user?.phone || ""}
-                    ghanaCardNumber={null}
+                    ghanaCardNumber={savedGhanaCardNumber}
+                    verificationId={customerVerification.ghanaCardId}
+                    ghanaCardResponse={customerVerification.ghanaCardResponse}
                     onSuccess={async (
                       ghanaCardResponse,
                       verificationId,
@@ -215,12 +241,13 @@ const CustomerPremiumFinancingVerificationPage = () => {
                         ghanaCardNumber: ghanaCardNumber,
                         ghanaCardResponse: ghanaCardResponse,
                       });
-                      setCurrentStep(4);
+                      goToStep(3);
                     }}
+                    onCancel={() => goToStep(1)}
                   />
                 )}
 
-                {currentStep === 4 && (
+                {currentStep === 3 && (
                   <DeclarationForm
                     updateVerificationState={updateVerificationState}
                     initialDeclarations={declarations}
@@ -235,13 +262,13 @@ const CustomerPremiumFinancingVerificationPage = () => {
                         declarationAccepted: true,
                         signatureFilename: sigFilename,
                       });
-                      setCurrentStep(5);
+                      goToStep(4);
                     }}
-                    onCancel={() => setCurrentStep(3)}
+                    onCancel={() => goToStep(2)}
                   />
                 )}
 
-                {currentStep === 5 &&
+                {currentStep === 4 &&
                   (productTypeParam ? (
                     isGhanaVerified && isDeclarationAccepted ? (
                       <PaymentDetailsStep
@@ -265,10 +292,10 @@ const CustomerPremiumFinancingVerificationPage = () => {
                           const details = await submitPayment();
                           if (details) {
                             setApprovalDetails(details);
-                            setCurrentStep(6);
+                            goToStep(5);
                           }
                         }}
-                        onCancel={() => setCurrentStep(4)}
+                        onCancel={() => goToStep(3)}
                         isLoading={isPaymentSubmitting}
                       />
                     ) : (
@@ -288,7 +315,7 @@ const CustomerPremiumFinancingVerificationPage = () => {
                   ))}
 
                 {/* Verify Payment Step */}
-                {currentStep === 6 && approvalDetails && (
+                {currentStep === 5 && approvalDetails && (
                   <ApprovalScreen
                     type="premium-financing"
                     paymentId={approvalDetails.paymentId}
@@ -296,10 +323,10 @@ const CustomerPremiumFinancingVerificationPage = () => {
                     refId={approvalDetails.refId}
                     accountNumber={approvalDetails.accountNumber}
                     pfId={approvalDetails.pfId}
-                    onNext={() => setCurrentStep(7)}
+                    onNext={() => goToStep(6)}
                   />
                 )}
-                {currentStep === 7 && (
+                {currentStep === 6 && (
                   <div className="text-center py-6 sm:py-8">
                     <p className="text-muted-foreground text-sm sm:text-base">
                       Payment successful. You can now close this page.

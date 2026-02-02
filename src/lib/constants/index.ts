@@ -9,6 +9,7 @@ import {
   User,
   type LucideIcon,
 } from "lucide-react";
+import { Declaration } from "../interfaces";
 
 export const ROUTES = {
   LOGIN: "/sign-in",
@@ -298,3 +299,39 @@ export {
   getStandardPaymentSteps,
   PAYMENT_STEPS,
 } from "./payment-steps";
+
+export const DECLARATION_ITEMS: Array<{
+  key: keyof Declaration;
+  label: string;
+}> = [
+  {
+    key: "termsAndConditions",
+    label:
+      "I have read and understood the premium financing (loan) terms and conditions.",
+  },
+  {
+    key: "dataProcessing",
+    label:
+      "I consent to the processing of my personal data for loan administration, verification, and payment processing.",
+  },
+  {
+    key: "insuranceTerms",
+    label:
+      "I understand this is a loan to finance my insurance premium, and that the insurance policy terms are separate from this loan agreement.",
+  },
+  {
+    key: "premiumPayment",
+    label:
+      "I authorize payment of the insurance premium and I agree to repay the loan according to the repayment schedule.",
+  },
+  {
+    key: "createAccount",
+    label:
+      "I authorize Globafin to create an account on my behalf using the information provided if I do not already have an existing account and wish to apply for a loan",
+  },
+  {
+    key: "policyValidity",
+    label:
+      "I confirm that the information provided for this premium financing request is accurate and complete.",
+  },
+];

@@ -30,6 +30,11 @@ interface GhanaCardVerificationStepProps {
   userEmail: string;
   userPhone: string;
   ghanaCardNumber?: string | null;
+  verificationId?: string;
+  ghanaCardResponse?:
+    | PublicGhanaCardVerificationResponse
+    | MainUserGhanaCardVerificationResponse
+    | null;
   onSuccess: (
     ghanaCardResponse:
       | PublicGhanaCardVerificationResponse
@@ -45,6 +50,8 @@ export const GhanaCardVerificationStep = ({
   userEmail,
   userPhone,
   ghanaCardNumber: initialGhanaCardNumber,
+  verificationId,
+  ghanaCardResponse,
   onSuccess,
   onCancel,
 }: GhanaCardVerificationStepProps) => {
@@ -139,6 +146,46 @@ export const GhanaCardVerificationStep = ({
 
   if (!hasRequiredUserInfo) {
     return null;
+  }
+
+  const isAlreadyVerified = Boolean(verificationId && ghanaCardResponse);
+
+  // If already verified (e.g., restored from sessionStorage), skip the camera flow entirely.
+  // Show the same success UI and allow user to continue immediately.
+  if (isAlreadyVerified) {
+    return (
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <label htmlFor="ghanaCardNumber" className="text-sm font-medium text-gray-700">
+            Ghana Card Number
+          </label>
+          <Input
+            id="ghanaCardNumber"
+            value={ghanaCardNumber}
+            onChange={(e) => setGhanaCardNumber(e.target.value)}
+            placeholder="GHA-XXXXXXXXX"
+          />
+          <p className="text-xs text-gray-500">
+            You&apos;re already verified for this session. If the number is incorrect, you
+            can update it and redo verification.
+          </p>
+        </div>
+
+        <VerificationResult
+          isVerificationSuccessful={true}
+          handleRetry={() => {
+            // User wants to redo verification; go back (parent can decide next step)
+            if (onCancel) onCancel();
+          }}
+          handleNext={() => {
+            onSuccess(ghanaCardResponse ?? null, verificationId, ghanaCardNumber);
+          }}
+          handlePrevious={() => {
+            if (onCancel) onCancel();
+          }}
+        />
+      </div>
+    );
   }
 
   return (

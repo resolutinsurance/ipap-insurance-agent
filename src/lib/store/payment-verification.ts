@@ -116,3 +116,12 @@ export const customerSelfVerificationAtom =
     CUSTOMER_SELF_VERIFICATION_STORAGE_KEY,
     initialPaymentState
   );
+
+// Agent remote premium financing flow uses its own sessionStorage entry to avoid
+// colliding with other payment flows that also use `paymentVerificationAtom`.
+export const REMOTE_PREMIUM_FINANCING_STORAGE_KEY = "remote-premium-financing";
+export const remotePremiumFinancingAtom =
+  atomWithSessionStorage<PaymentVerificationState>(
+    REMOTE_PREMIUM_FINANCING_STORAGE_KEY,
+    initialPaymentState
+  );
