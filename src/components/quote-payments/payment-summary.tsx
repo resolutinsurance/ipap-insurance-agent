@@ -16,7 +16,6 @@ const PaymentSummary = ({
   actualProcessingFee: number;
   initialDeposit: number;
 }) => {
-  const quoteAmount = actualProcessingFee + initialDeposit;
   return (
     <div className="p-4 bg-gray-50 rounded-lg space-y-2">
       <h4 className="font-semibold text-sm">Payment Summary</h4>
@@ -36,7 +35,7 @@ const PaymentSummary = ({
         <div className="text-sm">
           <span className="text-gray-600">Total Amount to Pay:</span>
           <span className="font-medium ml-2">
-            {formatCurrencyToGHS(calculateCharges(quoteAmount))}
+            {formatCurrencyToGHS(calculateCharges(actualProcessingFee, initialDeposit))}
           </span>
         </div>
       </div>

@@ -104,6 +104,7 @@ export const calculateProcessingFee = (
 //   return "2%";
 // }
 
-export const calculateCharges = (quoteAmount: number) => {
+export const calculateCharges = (actualProcessingFee: number, initialDeposit: number) => {
+  const quoteAmount = actualProcessingFee + initialDeposit;
   return quoteAmount + Math.min(quoteAmount * 0.015, 40);
 };

@@ -112,6 +112,7 @@ export const RepaymentSchedulePreviewStep = ({
               isLoading={isLoading}
               showPagination={false}
               hideTitle={true}
+              showExportAction={false}
               showColumnsFilter={false}
             />
           </div>

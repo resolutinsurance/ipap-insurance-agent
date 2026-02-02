@@ -1,15 +1,8 @@
 "use client";
 
-import InfoRow from "@/components/dashboard/payment/details/info-row";
+import FinanceLogSheet from "@/components/modals/finance-log-sheet";
 import { RenderDataTable } from "@/components/table";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WidthConstraint from "@/components/ui/width-constraint";
 import {
@@ -34,8 +27,8 @@ export default function CompanyFinancesPage() {
 
   const [activeTab, setActiveTab] = useState<keyof typeof TABS>(TABS.FINANCIAL_ENTRIES);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [detailsContext, setDetailsContext] = useState<keyof typeof TABS>(
-    TABS.FINANCIAL_ENTRIES
+  const [type, setType] = useState<"FINANCIAL_ENTRIES" | "TRANSACTION_JOURNALS">(
+    "FINANCIAL_ENTRIES"
   );
   const [selectedRow, setSelectedRow] = useState<Record<string, unknown> | null>(null);
 
@@ -57,7 +50,7 @@ export default function CompanyFinancesPage() {
   const handleRowClick = (row: unknown, context: keyof typeof TABS) => {
     if (!row || typeof row !== "object") return;
     setSelectedRow(row as Record<string, unknown>);
-    setDetailsContext(context);
+    setType(context);
     setIsDetailsOpen(true);
   };
 
@@ -119,38 +112,14 @@ export default function CompanyFinancesPage() {
         </Card>
       </div>
 
-      <Sheet
-        open={isDetailsOpen}
-        onOpenChange={(open) => {
-          setIsDetailsOpen(open);
-          if (!open) {
-            setSelectedRow(null);
-          }
-        }}
-      >
-        <SheetContent className="sm:max-w-lg">
-          <SheetHeader>
-            <SheetTitle>
-              {detailsContext === TABS.FINANCIAL_ENTRIES
-                ? "Financial Entry Details"
-                : "Transaction Journal Details"}
-            </SheetTitle>
-            <SheetDescription>Click outside to close.</SheetDescription>
-          </SheetHeader>
-
-          <div className="px-4 pb-4 overflow-y-auto">
-            {selectedRow ? (
-              <div className="space-y-2">
-                {selectedRowFields.map((field) => (
-                  <InfoRow key={field.key} label={field.label} value={field.value} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">No row selected.</p>
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+      <FinanceLogSheet
+        isDetailsOpen={isDetailsOpen}
+        setIsDetailsOpen={setIsDetailsOpen}
+        selectedRow={selectedRow}
+        setSelectedRow={setSelectedRow}
+        type={type}
+        selectedRowFields={selectedRowFields}
+      />
     </WidthConstraint>
   );
 }
