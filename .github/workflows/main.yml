@@ -74,7 +74,7 @@ jobs:
                       \"ref\": \"dev\",
                       \"sha\": \"$COMMIT_SHA\"
                     },
-                    \"target\": \"preview\"
+                    \"target\": \"staging\"
                   }" > payload.json
                   echo "Payload created for DEVELOPMENT deployment"
                   echo "Repository: $ORG_NAME/$REPO_NAME"
