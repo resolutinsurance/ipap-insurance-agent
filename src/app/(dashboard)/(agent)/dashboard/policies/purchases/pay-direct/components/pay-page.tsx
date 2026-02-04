@@ -4,6 +4,7 @@ import ApprovalScreen from "@/components/dashboard/payment/approval-screen";
 import { GhanaCardVerificationStep } from "@/components/dashboard/payment/ghana-card-verification-step";
 import { LoanCalculationStep } from "@/components/dashboard/payment/loan-calculation-step";
 import { PaymentDetailsStep } from "@/components/dashboard/payment/payment-details-step";
+import { RepaymentSchedulePreviewStep } from "@/components/dashboard/payment/repayment-schedule-preview-step";
 import { Card, CardContent } from "@/components/ui/card";
 import { Stepper, type Step } from "@/components/ui/stepper";
 import WidthConstraint from "@/components/ui/width-constraint";
@@ -12,11 +13,11 @@ import {
   useQuotePremiumAmount,
   type ProductTypeForPremium,
 } from "@/hooks/use-quote-premium-amount";
-import { useSubmitLoyaltyPayment } from "@/hooks/use-submit-loyalty-payment";
+import { useSubmitQuotePayment } from "@/hooks/use-submit-quote-payment";
 import { getStandardPaymentSteps, UPLOADS_BASE_URL } from "@/lib/constants";
 import {
+  directPaymentVerificationAtom,
   getDefaultPaymentVerificationState,
-  loyaltyPaymentVerificationAtom,
 } from "@/lib/store";
 import type { PaymentVerificationState } from "@/lib/store/payment-verification";
 import { transformProductTypeToQuoteType } from "@/lib/utils";
@@ -25,16 +26,16 @@ import { useAtom } from "jotai";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 
-const PaymentDirectPage = () => {
+const PaymentDirect = () => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const [loyaltyVerification, setLoyaltyVerification] = useAtom(
-    loyaltyPaymentVerificationAtom
+  const [directVerification, setDirectVerification] = useAtom(
+    directPaymentVerificationAtom
   );
 
   const productType = (searchParams.get("productType") ||
-    "buy-money-insurance") as ProductTypeForPremium;
+    "thirdparty") as ProductTypeForPremium;
   const companyId = searchParams.get("companyId") || "";
   const quoteId = searchParams.get("requestId") || "";
   const paymentType = (searchParams.get("type") || "one-time") as
@@ -46,7 +47,7 @@ const PaymentDirectPage = () => {
   const [justVerified, setJustVerified] = React.useState(false);
 
   // Get verification state directly from Jotai atom (no session key needed since sessionStorage is session-specific)
-  const quoteVerificationState = loyaltyVerification || {
+  const quoteVerificationState = directVerification || {
     ghanaVerified: false,
     loanCalculated: false,
     declarationAccepted: false,
@@ -58,6 +59,7 @@ const PaymentDirectPage = () => {
   const isDeclarationAccepted = quoteVerificationState.declarationAccepted;
   const signatureFilename = quoteVerificationState.signatureFilename;
   const declarations = quoteVerificationState.declarations;
+  const loanData = quoteVerificationState.loanData;
 
   const isPremiumFinancing = paymentType === "premium-financing";
   const isInstallment = searchParams.get("isInstallment") === "true";
@@ -72,7 +74,7 @@ const PaymentDirectPage = () => {
   const quoteType = transformProductTypeToQuoteType(productType);
 
   // Payment submission hook
-  const { submitPayment, isSubmitting: isPaymentSubmitting } = useSubmitLoyaltyPayment({
+  const { submitPayment, isSubmitting: isPaymentSubmitting } = useSubmitQuotePayment({
     premiumAmount,
     customerId,
     selectedCompanyId: companyId,
@@ -89,14 +91,12 @@ const PaymentDirectPage = () => {
   );
 
   // Update verification state helper
-  // Helper function to convert File to base64 string for storage
-
   const updateVerificationState = React.useCallback(
     async (updates: Partial<PaymentVerificationState>) => {
-      setLoyaltyVerification((prev) => {
+      setDirectVerification((prev) => {
         return {
           ...prev,
-          type: "loyalty", // Ensure type is set
+          type: "direct", // Ensure type is set
           ...updates,
           // Preserve loanData if it exists and not being updated
           loanData: updates.loanData || prev.loanData,
@@ -110,32 +110,8 @@ const PaymentDirectPage = () => {
         };
       });
     },
-    [setLoyaltyVerification]
+    [setDirectVerification]
   );
-
-  // Determine which step index corresponds to which action
-  const getStepIndex = (stepName: string): number => {
-    if (stepName === "verification") return 1;
-    if (isPremiumFinancing && !isInstallment) {
-      if (stepName === "loan-calculation") return 2;
-      if (stepName === "declaration") return 3;
-      if (stepName === "payment-details") return 4;
-      if (stepName === "verify") return 5;
-    } else {
-      if (stepName === "declaration") return 2;
-      if (stepName === "payment-details") return 3;
-      if (stepName === "verify") return 4;
-    }
-    return 1;
-  };
-
-  const [approvalDetails, setApprovalDetails] = React.useState<{
-    paymentId: string;
-    network: string;
-    refId: string;
-    accountNumber: string;
-    pfId?: string;
-  } | null>(null);
 
   // Get user data for verification (but always require verification, don't check status)
   const { user: verificationUser, isLoading: isVerificationLoading } =
@@ -163,13 +139,6 @@ const PaymentDirectPage = () => {
     quoteVerificationState.ghanaVerified,
   ]);
 
-  // Clear verification state when quoteId or customerId changes (new payment session)
-  // Since sessionStorage is already session-specific, we just reset to initial state
-  React.useEffect(() => {
-    // Reset to initial state when starting a new payment session
-    setLoyaltyVerification(getDefaultPaymentVerificationState("loyalty"));
-  }, [quoteId, customerId, setLoyaltyVerification]);
-
   // Enforce verification requirement
   React.useEffect(() => {
     if (
@@ -196,6 +165,31 @@ const PaymentDirectPage = () => {
     searchParams,
     steps.length,
   ]);
+
+  // Determine which step index corresponds to which action
+  const getStepIndex = (stepName: string): number => {
+    if (stepName === "verification") return 1;
+    if (isPremiumFinancing && !isInstallment) {
+      if (stepName === "loan-calculation") return 2;
+      if (stepName === "declaration") return 3;
+      if (stepName === "repayment-schedule") return 4;
+      if (stepName === "payment-details") return 5;
+      if (stepName === "verify") return 6;
+    } else {
+      if (stepName === "declaration") return 2;
+      if (stepName === "payment-details") return 3;
+      if (stepName === "verify") return 4;
+    }
+    return 1;
+  };
+
+  const [approvalDetails, setApprovalDetails] = React.useState<{
+    paymentId: string;
+    network: string;
+    refId: string;
+    accountNumber: string;
+    pfId?: string;
+  } | null>(null);
 
   const goToStep = (step: number) => {
     if (step > 1 && !isVerificationComplete && !justVerified) {
@@ -227,10 +221,10 @@ const PaymentDirectPage = () => {
               <Stepper
                 steps={steps}
                 currentStep={currentStep}
-                className="w-full lg:w-[320px] h-auto lg:h-[120px]"
+                className="w-full lg:w-[320px] lg:max-h-[440px]"
               />
 
-              <div className="flex-1 max-w-xl">
+              <div className="flex-1 max-w-2xl">
                 {currentStep === 1 &&
                   (isVerificationLoading ? (
                     <div className="text-center py-6 sm:py-8">
@@ -250,7 +244,7 @@ const PaymentDirectPage = () => {
                       ghanaCardResponse={quoteVerificationState.ghanaCardResponse}
                       onSuccess={(ghanaCardResponse, verificationId, ghanaCardNumber) => {
                         setJustVerified(true);
-                        setLoyaltyVerification((prev) => ({
+                        setDirectVerification((prev) => ({
                           ...prev,
                           ghanaVerified: true,
                           ghanaCardId: verificationId,
@@ -278,15 +272,12 @@ const PaymentDirectPage = () => {
                     <LoanCalculationStep
                       premiumAmount={premiumAmount}
                       quoteType={quoteType}
-                      verificationAtom={loyaltyPaymentVerificationAtom}
+                      verificationAtom={directPaymentVerificationAtom}
                       onNext={async () => {
-                        // Get the latest loanData from state before marking as calculated
-                        const latestLoanData = loyaltyVerification.loanData;
-
-                        // Ensure loanData is saved and mark as calculated
+                        // LoanCalculationStep already persists the full loanData (including summary fields)
+                        // Just mark the step as complete here to avoid overwriting with a stale snapshot.
                         await updateVerificationState({
                           loanCalculated: true,
-                          loanData: latestLoanData, // Preserve loanData
                         });
                         goToStep(getStepIndex("declaration"));
                       }}
@@ -318,10 +309,53 @@ const PaymentDirectPage = () => {
                           declarationAccepted: true,
                           signatureFilename: sigFilename,
                         });
-                        goToStep(getStepIndex("payment-details"));
+                        // For premium financing, go to repayment schedule preview, otherwise go to payment details
+                        if (isPremiumFinancing && !isInstallment) {
+                          goToStep(getStepIndex("repayment-schedule"));
+                        } else {
+                          goToStep(getStepIndex("payment-details"));
+                        }
                       }}
                       onCancel={() => goToStep(currentStep - 1)}
                     />
+                  ) : (
+                    <div className="text-center py-6 sm:py-8">
+                      <p className="text-muted-foreground text-sm sm:text-base">
+                        {!isVerificationComplete
+                          ? "Please complete Ghana card verification first"
+                          : "Please complete the previous steps first"}
+                      </p>
+                    </div>
+                  ))}
+
+                {/* Repayment Schedule Preview Step (Premium Financing only) */}
+                {currentStep === getStepIndex("repayment-schedule") &&
+                  isPremiumFinancing &&
+                  !isInstallment &&
+                  (isVerificationComplete && isDeclarationAccepted ? (
+                    loanData?.noofInstallments &&
+                    loanData?.loanAmount != null &&
+                    loanData?.totalRepayment != null &&
+                    loanData?.totalPaid != null ? (
+                      <RepaymentSchedulePreviewStep
+                        paymentData={{
+                          initialDeposit: String(loanData.initialDeposit ?? 0),
+                          totalRepayment: String(loanData.totalRepayment ?? 0),
+                          totalPaid: String(loanData.totalPaid ?? 0),
+                          loanAmount: String(loanData.loanAmount ?? 0),
+                          noofInstallments: loanData.noofInstallments ?? 0,
+                          paymentFrequency: loanData.paymentFrequency || "monthly",
+                        }}
+                        onNext={() => goToStep(getStepIndex("payment-details"))}
+                        onCancel={() => goToStep(getStepIndex("declaration"))}
+                      />
+                    ) : (
+                      <div className="text-center py-6 sm:py-8">
+                        <p className="text-muted-foreground text-sm sm:text-base">
+                          Please complete loan calculation to view repayment schedule
+                        </p>
+                      </div>
+                    )
                   ) : (
                     <div className="text-center py-6 sm:py-8">
                       <p className="text-muted-foreground text-sm sm:text-base">
@@ -346,6 +380,10 @@ const PaymentDirectPage = () => {
                         if (details) {
                           setApprovalDetails(details);
                           goToStep(getStepIndex("verify"));
+                          // Reset verification state after successful payment completion
+                          setDirectVerification(
+                            getDefaultPaymentVerificationState("direct")
+                          );
                         }
                       }}
                       onCancel={() => goToStep(currentStep - 1)}
@@ -381,4 +419,4 @@ const PaymentDirectPage = () => {
   );
 };
 
-export default PaymentDirectPage;
+export default PaymentDirect;

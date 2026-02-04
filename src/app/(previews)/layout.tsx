@@ -1,5 +1,5 @@
 import GlobafinLetterHead from "@/components/preview/globafin-letterhead";
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 
 export default function PreviewsLayout({ children }: { children: ReactNode }) {
   return (
@@ -31,10 +31,12 @@ export default function PreviewsLayout({ children }: { children: ReactNode }) {
         `,
         }}
       />
-      <div className="bg-white">
-        <GlobafinLetterHead />
-        {children}
-      </div>
+      <Suspense fallback={<div>Loading...</div>}>
+        <div className="bg-white">
+          <GlobafinLetterHead />
+          {children}
+        </div>
+      </Suspense>
     </>
   );
 }
