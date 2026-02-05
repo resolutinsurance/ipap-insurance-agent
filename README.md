@@ -12,7 +12,7 @@ It is a focused dashboard used by agents and insurance companies’ staff to:
 
 ## 🛠️ Tech Stack (Agent App)
 
-- **Framework**: [Next.js 15.2.4](https://nextjs.org/) (App Router)
+- **Framework**: [Next.js 15.2.6](https://nextjs.org/) (App Router)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **UI Library**: [React 19](https://react.dev/)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
@@ -22,8 +22,9 @@ It is a focused dashboard used by agents and insurance companies’ staff to:
   - [Jotai](https://jotai.org/) (Client state)
 - **Forms**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
 - **HTTP Client**: [Axios](https://axios-http.com/)
-- **Charts**: [Recharts](https://recharts.org/)
+- **Charts & dashboards**: [Recharts](https://recharts.org/), [Tremor](https://www.tremor.so/)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
+- **Other**: [cmdk](https://cmdk.paco.me/) (command palette), [Sonner](https://sonner.emilkowal.ski/) (toasts), [Lucide React](https://lucide.dev/) + [React Icons](https://react-icons.github.io/react-icons/), PDF generation (Puppeteer)
 - **PWA Support**: Progressive Web App capabilities
 
 ## 📋 Prerequisites
@@ -40,7 +41,7 @@ Before you begin, ensure you have the following installed:
 
    ```bash
    git clone <repository-url>
-   cd ipap-v2
+   cd ipap-insurance-agent
    ```
 
 2. **Install dependencies**
@@ -86,29 +87,40 @@ Before you begin, ensure you have the following installed:
 ```
 ipap-insurance-agent/
 ├── src/
-│   ├── app/                    # Next.js App Router pages
-│   │   ├── (auth)/             # Authentication routes
-│   │   ├── (dashboard)/        # Agent dashboard routes
-│   │   │   ├── (agent)/        # Agent-specific dashboard (this app)
-│   │   │   └── (user)/         # (Legacy / shared) user-facing routes
-│   │   └── (common)/            # Public/common routes
-│   ├── components/             # React components
-│   │   ├── dashboard/           # Dashboard-specific components
-│   │   ├── quote-payments/     # Payment-related components
-│   │   ├── quote-request/      # Quote request components
-│   │   └── ui/                 # Reusable UI components
-│   ├── hooks/                  # Custom React hooks
-│   ├── lib/                    # Utilities and configurations
-│   │   ├── services/           # API service functions
-│   │   ├── interfaces/         # TypeScript interfaces
-│   │   ├── constants/          # Application constants
-│   │   └── schemas/            # Zod validation schemas
-│   ├── layouts/                # Layout components
-│   └── middleware.ts           # Next.js middleware
-├── public/                     # Static assets
-├── next.config.ts              # Next.js configuration
-├── tsconfig.json              # TypeScript configuration
-└── package.json               # Dependencies and scripts
+│   ├── app/                        # Next.js App Router
+│   │   ├── (auth)/                 # Sign-in, forgot-password, verify-id
+│   │   ├── (common)/               # Public/shared (e.g. customer self-verification)
+│   │   ├── (dashboard)/            # Dashboard shell
+│   │   │   ├── (agent)/            # Agent dashboard routes
+│   │   │   │   └── dashboard/      # home, customers, find-policy, policies, finances, profile, remote-premium-financing
+│   │   │   └── layout.tsx
+│   │   ├── (previews)/             # Preview pages (premium-financing, quote-payment, repayment-schedule)
+│   │   ├── api/                    # API routes (e.g. generate-pdf)
+│   │   └── layout.tsx, manifest.ts
+│   ├── components/
+│   │   ├── dashboard/              # Agent home, find-policy, payment flow, declaration
+│   │   ├── ghana/                  # Ghana Card verification shared UI
+│   │   ├── modals/                 # Confirm modals, export, finance log sheet
+│   │   ├── preview/                # Contract/letterhead for PDF
+│   │   ├── profile/                # Agent profile sections
+│   │   ├── quote-payments/         # Duration, frequency, summary components
+│   │   └── ui/                     # Reusable UI (Radix-based)
+│   ├── hooks/                      # use-auth, use-agent, use-premium-financing, use-payment-verification, etc.
+│   ├── lib/
+│   │   ├── api.ts                  # Centralized Axios API client
+│   │   ├── constants/               # Routes, cookies, user types, session, sidebar
+│   │   ├── interfaces/             # TypeScript types
+│   │   ├── providers/              # Query provider, app providers
+│   │   ├── schemas/                # Zod validation schemas
+│   │   ├── services/               # API services (auth, agent, customers, finance, policy-info, premium-financing, quote-requests, etc.)
+│   │   ├── store/                  # Jotai store (payment verification, payment storage)
+│   │   └── utils/                  # API error, download, export, file utils, PDF browser instance
+│   ├── layouts/                    # main-layout, analytics-layout
+│   └── middleware.ts               # Auth, agent access, Ghana Card verification
+├── public/                         # Static assets, PWA icons, docs
+├── next.config.ts
+├── tsconfig.json
+└── package.json
 ```
 
 ## 🎯 Agent Portal Features
@@ -116,20 +128,18 @@ ipap-insurance-agent/
 ### Agent Workflows
 
 - **Find Existing Policies**
-
   - Search by Policy ID (loyalty and non‑motor policies)
   - View core policy and loyalty details
   - Start payment flows directly from the policy (Pay Small Small, one‑time)
 
 - **Premium Financing (Pay Small Small)**
-
   - Configure loan terms: duration and payment frequency
   - Auto‑calculate financing summary via backend (loan amount, total repayment, installments)
   - Preview repayment schedule (agent side and customer self‑service link)
   - Process repayments, including next‑installment flows
+  - Remote premium financing flow with customer verification link
 
 - **Customer Self‑Verification**
-
   - Generate remote links for customers to:
     - Preview financing details
     - Verify Ghana Card
@@ -137,16 +147,18 @@ ipap-insurance-agent/
     - Complete premium‑financing payment
 
 - **Payments**
-  - One‑time and premium‑financing payments
+  - One‑time and premium‑financing payments (including pay-direct)
   - Ghana Card verification requirements enforced in middleware
   - Payment schedule view for financed policies
+
+- **Dashboard**
+  - Home, customers, find policy, policies/purchases, financial logs, profile
 
 ### Technical Behaviour (Agent App)
 
 - **Agent‑only access**
-
   - Middleware enforces:
-    - `userType === AGENT`
+    - `userType === AGENT` (Sysagent)
     - Agent has a valid `companyID`
     - Ghana Card verified (`GhcardNo` + `verified === true`) before accessing protected flows
 
