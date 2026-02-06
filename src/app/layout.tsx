@@ -1,6 +1,7 @@
 import AnalyticsLayout from "@/layouts/analytics-layout";
 import { Providers } from "@/lib/providers";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Script from "next/script";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -15,9 +16,17 @@ export default async function RootLayout(
     children: React.ReactNode;
   }>
 ) {
+  const headerList = await headers();
+  const pathname = headerList.get("x-current-path");
+
+  const isDashboardRoute = pathname?.startsWith("/dashboard");
   return (
     <html lang="en" className="light scroll-smooth" style={{ colorScheme: "light" }}>
-      <body className={`antialiased overflow-clip`}>
+      <body
+        className={`antialiased ${
+          isDashboardRoute ? "overflow-clip" : "overflow-x-clip"
+        }`}
+      >
         <Toaster position="top-right" richColors />
         <Providers>
           <AnalyticsLayout>{props.children}</AnalyticsLayout>

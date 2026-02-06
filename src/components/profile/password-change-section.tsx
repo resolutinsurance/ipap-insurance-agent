@@ -1,7 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PasswordFormData, passwordSchema } from "@/lib/schemas";
@@ -10,15 +17,19 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-interface PasswordChangeSectionProps {
+interface PasswordChangeModalProps {
   userEmail?: string;
   onChangePassword: (email: string, newPassword: string) => Promise<void>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export const PasswordChangeSection = ({
+export const PasswordChangeModal = ({
   userEmail,
   onChangePassword,
-}: PasswordChangeSectionProps) => {
+  open,
+  onOpenChange,
+}: PasswordChangeModalProps) => {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [passwordFormData, setPasswordFormData] = useState<PasswordFormData | null>(null);
 
@@ -45,6 +56,7 @@ export const PasswordChangeSection = ({
       toast.success("Password changed successfully");
       setShowPasswordConfirm(false);
       passwordForm.reset();
+      onOpenChange(false);
     } catch (err) {
       console.error("Password change error:", err);
       toast.error(err instanceof Error ? err.message : "Failed to change password");
@@ -53,69 +65,78 @@ export const PasswordChangeSection = ({
     }
   };
 
-  const isPasswordFormDirty = passwordForm.formState.isDirty;
+  const handleClose = () => {
+    passwordForm.reset();
+    onOpenChange(false);
+  };
 
   return (
     <>
-      <Card>
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <h2 className="text-lg font-medium">Change Password</h2>
-            <p className="text-sm text-muted-foreground">
-              To change your password please confirm here
-            </p>
-            <form
-              onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
-              className="space-y-4"
-            >
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Current Password</label>
-                <PasswordInput
-                  className="rounded-xl"
-                  {...passwordForm.register("currentPassword")}
-                />
-                {passwordForm.formState.errors.currentPassword && (
-                  <p className="text-sm text-red-500">
-                    {passwordForm.formState.errors.currentPassword.message}
-                  </p>
-                )}
-              </div>
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+            <DialogDescription>
+              To change your password, please fill in the form below.
+            </DialogDescription>
+          </DialogHeader>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">New Password</label>
-                <PasswordInput
-                  className="rounded-xl"
-                  {...passwordForm.register("newPassword")}
-                />
-                {passwordForm.formState.errors.newPassword && (
-                  <p className="text-sm text-red-500">
-                    {passwordForm.formState.errors.newPassword.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Confirm Password</label>
-                <PasswordInput
-                  className="rounded-xl"
-                  {...passwordForm.register("confirmPassword")}
-                />
-                {passwordForm.formState.errors.confirmPassword && (
-                  <p className="text-sm text-red-500">
-                    {passwordForm.formState.errors.confirmPassword.message}
-                  </p>
-                )}
-              </div>
-
-              {isPasswordFormDirty && (
-                <Button type="submit" className="w-full">
-                  Update Password
-                </Button>
+          <form
+            onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
+            className="space-y-4"
+          >
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Current Password</label>
+              <PasswordInput
+                className="rounded-xl"
+                {...passwordForm.register("currentPassword")}
+              />
+              {passwordForm.formState.errors.currentPassword && (
+                <p className="text-sm text-red-500">
+                  {passwordForm.formState.errors.currentPassword.message}
+                </p>
               )}
-            </form>
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">New Password</label>
+              <PasswordInput
+                className="rounded-xl"
+                {...passwordForm.register("newPassword")}
+              />
+              {passwordForm.formState.errors.newPassword && (
+                <p className="text-sm text-red-500">
+                  {passwordForm.formState.errors.newPassword.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Confirm Password</label>
+              <PasswordInput
+                className="rounded-xl"
+                {...passwordForm.register("confirmPassword")}
+              />
+              {passwordForm.formState.errors.confirmPassword && (
+                <p className="text-sm text-red-500">
+                  {passwordForm.formState.errors.confirmPassword.message}
+                </p>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Update Password</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <ConfirmModal
         isOpen={showPasswordConfirm}
