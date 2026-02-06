@@ -86,7 +86,10 @@ export const LOCAL_STORAGE_KEYS = {
 
 export type UserType = (typeof USER_TYPES)[keyof typeof USER_TYPES];
 
-export const API_RAW_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+export const API_RAW_URL =
+  process.env.NODE_ENV === "development"
+    ? process.env.NEXT_PUBLIC_DEV_API_BASE_URL
+    : process.env.NEXT_PUBLIC_API_BASE_URL;
 export const API_BASE_URL = API_RAW_URL;
 export const UPLOADS_BASE_URL = `${API_BASE_URL}/uploads/`;
 

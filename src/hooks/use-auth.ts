@@ -26,7 +26,7 @@ import {
   removeFromLocalStorage,
   saveToLocalStorage,
 } from "@/lib/storage";
-import { authLoadingAtom, userAtom } from "@/lib/store";
+import { userAtom } from "@/lib/store";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useAtom } from "jotai";
 import Cookies from "js-cookie";
@@ -34,7 +34,6 @@ import { toast } from "sonner";
 
 export const useAuth = () => {
   const [user, setUser] = useAtom(userAtom);
-  const [isLoading, setIsLoading] = useAtom(authLoadingAtom);
 
   // Get user type from cookies for analytics
   const userTypeCookie = Cookies.get(COOKIE_KEYS.userType);
@@ -66,9 +65,6 @@ export const useAuth = () => {
 
   const login = useMutation({
     mutationFn: loginUser,
-    onMutate: () => {
-      setIsLoading(true);
-    },
     onSuccess: (data) => {
       if (!data.user) {
         throw new Error("Invalid response from server");
@@ -129,11 +125,13 @@ export const useAuth = () => {
               : data.agentData;
 
           if (!agentData.companyID) {
+            toast.error("You are not an agent with a company");
             // Agent without companyId, logout
             logout(() => setUser(null));
             return;
           }
         } else {
+          toast.error("You are not an agent");
           // No agent data, logout
           logout(() => setUser(null));
           return;
@@ -175,9 +173,6 @@ export const useAuth = () => {
       removeFromLocalStorage(LOCAL_STORAGE_KEYS.purchases);
       removeFromLocalStorage(LOCAL_STORAGE_KEYS.quotes);
       setUser(null);
-    },
-    onSettled: () => {
-      setIsLoading(false);
     },
   });
 
@@ -337,7 +332,6 @@ export const useAuth = () => {
     user: user || getCurrentUser(),
     userType: getUserType(),
     userTypeUnmasked: getUserTypeUnmasked(),
-    isLoading,
     isAuthenticated,
     login,
     decryptUserRefLink,

@@ -1,9 +1,10 @@
+import PageLoader from "@/components/ui/page-loader";
 import { Suspense } from "react";
 import PaymentDirect from "./components/pay-page";
 
 const PaymentDirectPage = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<PageLoader />}>
       <PaymentDirect />
     </Suspense>
   );

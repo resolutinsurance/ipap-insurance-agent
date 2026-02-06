@@ -1,10 +1,11 @@
 import AuthHeader from "@/components/auth-header";
+import PageLoader from "@/components/ui/page-loader";
 import Image from "next/image";
 import React, { Suspense } from "react";
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<PageLoader />}>
       <main className="grid grid-cols-1 md:grid-cols-3 w-screen h-screen">
         <div className="col-span-2 flex flex-col">
           <AuthHeader />
