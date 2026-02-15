@@ -1,29 +1,31 @@
-"use client";
+'use client'
 
-import { AppSidebar } from "@/components/app-sidebar";
-import { Header, InnerHeader } from "@/components/header";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import WidthConstraint from "@/components/ui/width-constraint";
-import { cn } from "@/lib/utils";
-import { ReactNode } from "react";
+import { AppSidebar } from '@/components/app-sidebar'
+import { Header, InnerHeader } from '@/components/header'
+import { cn } from '@/lib/utils'
+import {
+  SidebarProvider,
+  WidthConstraint,
+} from '@resolutinsurance/ipap-shared/components'
+import { ReactNode } from 'react'
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex h-screen w-screen overflow-clip bg-background">
+      <div className="bg-background flex h-screen w-screen overflow-clip">
         <AppSidebar />
         <div
           className={cn(
-            "flex flex-col flex-1 transition-all overflow-x-auto duration-300 ease-in-out"
+            'flex flex-1 flex-col overflow-x-auto transition-all duration-300 ease-in-out',
           )}
         >
           <Header />
-          <WidthConstraint className="w-full h-[calc(100vh-55px)] overflow-y-auto">
+          <WidthConstraint className="h-[calc(100vh-55px)] w-full overflow-y-auto">
             <InnerHeader />
-            <main className="flex-1 h-[calc(100vh-200px)]">{children}</main>
+            <main className="h-[calc(100vh-200px)] flex-1">{children}</main>
           </WidthConstraint>
         </div>
       </div>
     </SidebarProvider>
-  );
+  )
 }

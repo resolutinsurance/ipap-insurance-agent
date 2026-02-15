@@ -1,24 +1,9 @@
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useAgent } from "@/hooks/use-agent";
-import { useAuth } from "@/hooks/use-auth";
-import { USER_TYPES } from "@/lib/constants";
-import { ApiError, CustomerModalProps, User } from "@/lib/interfaces";
-import { customerFormSchema, CustomerFormValues } from "@/lib/schemas";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { FieldValue, FieldValues, useForm, UseFormReturn } from "react-hook-form";
-import { toast } from "sonner";
+import { useAgent } from '@/hooks/use-agent'
+import { useAuth } from '@/hooks/use-auth'
+import { USER_TYPES } from '@/lib/constants'
+import { ApiError, CustomerModalProps, User } from '@/lib/interfaces'
+import { customerFormSchema, CustomerFormValues } from '@/lib/schemas'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,28 +13,46 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../ui/alert-dialog";
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+  Textarea,
+} from '@resolutinsurance/ipap-shared/components'
+import { useEffect, useState } from 'react'
+import {
+  FieldValue,
+  FieldValues,
+  useForm,
+  UseFormReturn,
+} from 'react-hook-form'
+import { toast } from 'sonner'
 
-type AddFormValues = CustomerFormValues;
-type EditFormValues = Omit<CustomerFormValues, "password">;
+type AddFormValues = CustomerFormValues
+type EditFormValues = Omit<CustomerFormValues, 'password'>
 
 interface FormFieldProps<T extends FieldValues> {
-  name: keyof T;
-  label: string;
-  type?: string;
-  isTextarea?: boolean;
-  form: UseFormReturn<T>;
+  name: keyof T
+  label: string
+  type?: string
+  isTextarea?: boolean
+  form: UseFormReturn<T>
 }
 
 const FormField = <T extends FieldValues>({
   name,
   label,
-  type = "text",
+  type = 'text',
   isTextarea = false,
   form,
 }: FormFieldProps<T>) => {
-  const Component = isTextarea ? Textarea : Input;
-  const error = form.formState.errors[name];
+  const Component = isTextarea ? Textarea : Input
+  const error = form.formState.errors[name]
 
   return (
     <div className="space-y-2">
@@ -60,10 +63,12 @@ const FormField = <T extends FieldValues>({
         placeholder={`Enter ${label.toLowerCase()}`}
         {...form.register(name as FieldValue<T>)}
       />
-      {error && <p className="text-sm text-red-500">{error.message as string}</p>}
+      {error && (
+        <p className="text-sm text-red-500">{error.message as string}</p>
+      )}
     </div>
-  );
-};
+  )
+}
 
 const CustomerModal = ({
   isOpen,
@@ -73,58 +78,58 @@ const CustomerModal = ({
   selectedCustomer,
   onSuccess,
 }: CustomerModalProps) => {
-  const { agent, createCustomer, updateCustomer } = useAgent();
-  const { user, updateUserProfile } = useAuth();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [existingUserData, setExistingUserData] = useState<User | null>(null);
+  const { agent, createCustomer, updateCustomer } = useAgent()
+  const { user, updateUserProfile } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [existingUserData, setExistingUserData] = useState<User | null>(null)
 
   const addForm = useForm<AddFormValues>({
     resolver: zodResolver(customerFormSchema),
     defaultValues: {
-      fullname: "",
-      email: "",
-      phone: "",
-      address: "",
-      dob: "",
+      fullname: '',
+      email: '',
+      phone: '',
+      address: '',
+      dob: '',
     },
-  });
+  })
 
   const editForm = useForm<EditFormValues>({
     resolver: zodResolver(customerFormSchema),
     defaultValues: {
-      fullname: "",
-      email: "",
-      phone: "",
-      address: "",
-      dob: "",
+      fullname: '',
+      email: '',
+      phone: '',
+      address: '',
+      dob: '',
     },
-  });
+  })
 
   useEffect(() => {
-    if (selectedCustomer && (mode === "edit" || mode === "profile")) {
+    if (selectedCustomer && (mode === 'edit' || mode === 'profile')) {
       editForm.reset({
         fullname: selectedCustomer.fullname,
         email: selectedCustomer.email,
         phone: selectedCustomer.phone,
-        address: selectedCustomer.address || "",
-        dob: selectedCustomer.dob || "",
-      });
+        address: selectedCustomer.address || '',
+        dob: selectedCustomer.dob || '',
+      })
     }
-  }, [selectedCustomer, mode, editForm]);
+  }, [selectedCustomer, mode, editForm])
 
   const handleExistingUserError = (
     error: ApiError,
-    data: AddFormValues | EditFormValues
+    data: AddFormValues | EditFormValues,
   ) => {
     if (
       error?.response?.status === 400 &&
-      error?.response?.data?.message?.includes("user already exists")
+      error?.response?.data?.message?.includes('user already exists')
     ) {
-      const s = error.response.data.message.split(":");
+      const s = error.response.data.message.split(':')
       const customerId = error.response.data?.id
         ? error.response.data.id
-        : s[s.length - 1];
+        : s[s.length - 1]
 
       setExistingUserData({
         fullname: data.fullname,
@@ -133,132 +138,132 @@ const CustomerModal = ({
         address: data.address,
         dob: data.dob,
         id: customerId,
-      });
-      setShowConfirmDialog(true);
-      return true;
+      })
+      setShowConfirmDialog(true)
+      return true
     }
-    return false;
-  };
+    return false
+  }
 
   const handleAddSubmit = async (data: AddFormValues) => {
     if (!agent?.id) {
-      toast.error("Agent ID not found");
-      return;
+      toast.error('Agent ID not found')
+      return
     }
 
     const customerData = {
       ...data,
-      dob: data.dob || "",
-      address: data.address || "",
+      dob: data.dob || '',
+      address: data.address || '',
       registeredByAgentID: agent.id,
-    };
+    }
 
     try {
-      await createCustomer.mutateAsync(customerData);
-      toast.success("Customer added successfully");
-      onClose();
-      onSuccess?.();
+      await createCustomer.mutateAsync(customerData)
+      toast.success('Customer added successfully')
+      onClose()
+      onSuccess?.()
     } catch (error) {
-      const apiError = error as ApiError;
+      const apiError = error as ApiError
       if (!handleExistingUserError(apiError, data)) {
-        toast.error("An error occurred. Please try again.");
+        toast.error('An error occurred. Please try again.')
       }
     }
-  };
+  }
 
   const handleConfirmExistingUser = async () => {
-    if (!existingUserData || !agent?.id) return;
+    if (!existingUserData || !agent?.id) return
 
     try {
       const customerData = {
         ...existingUserData,
         registeredByAgentID: agent.id,
-        dob: existingUserData.dob || "",
-      };
+        dob: existingUserData.dob || '',
+      }
 
       await updateCustomer.mutateAsync({
         userId: existingUserData.id!,
         userData: customerData,
-      });
-      toast.success("Customer registered successfully");
-      setShowConfirmDialog(false);
-      setExistingUserData(null);
-      onClose();
-      onSuccess?.();
+      })
+      toast.success('Customer registered successfully')
+      setShowConfirmDialog(false)
+      setExistingUserData(null)
+      onClose()
+      onSuccess?.()
     } catch (error) {
-      console.error("error", error);
-      toast.error("Failed to register existing customer");
+      console.error('error', error)
+      toast.error('Failed to register existing customer')
     }
-  };
+  }
 
   const handleEditSubmit = async (data: EditFormValues) => {
     if (!selectedCustomer?.id) {
-      toast.error("Customer ID not found");
-      return;
+      toast.error('Customer ID not found')
+      return
     }
     await updateCustomer.mutateAsync(
       { userId: selectedCustomer.id, userData: data },
       {
         onSuccess: () => {
           toast.success(
-            mode === "profile"
-              ? "Profile updated successfully"
-              : "Customer updated successfully"
-          );
+            mode === 'profile'
+              ? 'Profile updated successfully'
+              : 'Customer updated successfully',
+          )
         },
-      }
-    );
-  };
+      },
+    )
+  }
 
   const handleProfileUpdate = async (data: EditFormValues) => {
     if (!user?.id) {
-      toast.error("User not found");
-      return;
+      toast.error('User not found')
+      return
     }
 
     await updateUserProfile.mutateAsync(
       { userId: user.id, data },
       {
         onSuccess: () => {
-          toast.success("Profile updated successfully");
+          toast.success('Profile updated successfully')
         },
         onError: () => {
-          toast.error("Failed to update profile");
+          toast.error('Failed to update profile')
         },
-      }
-    );
-  };
+      },
+    )
+  }
 
   const onSubmit = async (data: AddFormValues | EditFormValues) => {
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
-      if (mode === "add" && userType !== USER_TYPES.CUSTOMER) {
-        await handleAddSubmit(data as AddFormValues);
-      } else if (mode === "edit") {
-        await handleEditSubmit(data as EditFormValues);
-      } else if (mode === "profile") {
-        await handleProfileUpdate(data as EditFormValues);
+      if (mode === 'add' && userType !== USER_TYPES.CUSTOMER) {
+        await handleAddSubmit(data as AddFormValues)
+      } else if (mode === 'edit') {
+        await handleEditSubmit(data as EditFormValues)
+      } else if (mode === 'profile') {
+        await handleProfileUpdate(data as EditFormValues)
       }
-      onSuccess?.();
-      onClose();
+      onSuccess?.()
+      onClose()
     } catch (error) {
-      const apiError = error as ApiError;
+      const apiError = error as ApiError
       if (!handleExistingUserError(apiError, data)) {
-        toast.error("An error occurred. Please try again.");
+        toast.error('An error occurred. Please try again.')
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   // Define form fields configuration
   const formFields = [
-    { name: "fullname", label: "Full Name" },
-    { name: "email", label: "Email", type: "email" },
-    { name: "phone", label: "Phone Number" },
-    { name: "address", label: "Address" },
-    { name: "dob", label: "Date of Birth", type: "date" },
-  ];
+    { name: 'fullname', label: 'Full Name' },
+    { name: 'email', label: 'Email', type: 'email' },
+    { name: 'phone', label: 'Phone Number' },
+    { name: 'address', label: 'Address' },
+    { name: 'dob', label: 'Date of Birth', type: 'date' },
+  ]
 
   return (
     <>
@@ -266,30 +271,30 @@ const CustomerModal = ({
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
-              {mode === "add"
-                ? "Add New Customer"
-                : mode === "edit"
-                ? "Edit Customer"
-                : "Update Profile"}
+              {mode === 'add'
+                ? 'Add New Customer'
+                : mode === 'edit'
+                  ? 'Edit Customer'
+                  : 'Update Profile'}
             </DialogTitle>
             <DialogDescription>
-              {mode === "add"
-                ? "Fill in the details to add a new customer."
-                : mode === "edit"
-                ? "Update the customer details from modal."
-                : "Update your profile information."}
+              {mode === 'add'
+                ? 'Fill in the details to add a new customer.'
+                : mode === 'edit'
+                  ? 'Update the customer details from modal.'
+                  : 'Update your profile information.'}
             </DialogDescription>
           </DialogHeader>
 
           <form
             onSubmit={
-              mode === "add"
+              mode === 'add'
                 ? addForm.handleSubmit(onSubmit)
                 : editForm.handleSubmit(onSubmit)
             }
             className="space-y-4"
           >
-            {mode === "add" ? (
+            {mode === 'add' ? (
               <>
                 {formFields.map((field) => (
                   <FormField
@@ -321,12 +326,12 @@ const CustomerModal = ({
               </Button>
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting
-                  ? "Saving..."
-                  : mode === "add"
-                  ? "Save Customer"
-                  : mode === "edit"
-                  ? "Save Changes"
-                  : "Update Profile"}
+                  ? 'Saving...'
+                  : mode === 'add'
+                    ? 'Save Customer'
+                    : mode === 'edit'
+                      ? 'Save Changes'
+                      : 'Update Profile'}
               </Button>
             </DialogFooter>
           </form>
@@ -338,15 +343,15 @@ const CustomerModal = ({
           <AlertDialogHeader>
             <AlertDialogTitle>User Already Exists</AlertDialogTitle>
             <AlertDialogDescription>
-              This user already exists in the system. Would you like to register them as
-              your customer?
+              This user already exists in the system. Would you like to register
+              them as your customer?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
               onClick={() => {
-                setShowConfirmDialog(false);
-                setExistingUserData(null);
+                setShowConfirmDialog(false)
+                setExistingUserData(null)
               }}
             >
               Cancel
@@ -358,7 +363,7 @@ const CustomerModal = ({
         </AlertDialogContent>
       </AlertDialog>
     </>
-  );
-};
+  )
+}
 
-export default CustomerModal;
+export default CustomerModal

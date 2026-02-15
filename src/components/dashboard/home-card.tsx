@@ -1,11 +1,14 @@
-"use client";
+'use client'
 
-import { HomeCardProps } from "@/lib/interfaces";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
-import Link from "next/link";
-import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
+import { HomeCardProps } from '@/lib/interfaces'
+import { cn } from '@/lib/utils'
+import {
+  Button,
+  Card,
+  CardContent,
+} from '@resolutinsurance/ipap-shared/components'
+import Image from 'next/image'
+import Link from 'next/link'
 
 export const HomeCard = ({
   title,
@@ -19,20 +22,23 @@ export const HomeCard = ({
   return (
     <Card className={`${bgColor} border-none shadow-none`}>
       <CardContent>
-        <div className="flex flex-col md:flex-row items-start gap-6 relative z-10">
+        <div className="relative z-10 flex flex-col items-start gap-6 md:flex-row">
           <div className="flex-1 space-y-4">
             <h3 className="text-xl font-semibold">{title}</h3>
-            <p className="text-sm text-muted-foreground max-w-[400px]">{description}</p>
+            <p className="text-muted-foreground max-w-[400px] text-sm">
+              {description}
+            </p>
             <Button
               asChild
               className={cn(
-                !bgColor.includes("blue") && "bg-[#8965E5] hover:bg-[#8965E5]/90"
+                !bgColor.includes('blue') &&
+                  'bg-[#8965E5] hover:bg-[#8965E5]/90',
               )}
             >
               <Link href={ctaLink}>{ctaText}</Link>
             </Button>
           </div>
-          <div className="w-40 h-40 relative">
+          <div className="relative h-40 w-40">
             <Image
               src={imageSrc}
               alt={imageAlt}
@@ -44,5 +50,5 @@ export const HomeCard = ({
         </div>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
