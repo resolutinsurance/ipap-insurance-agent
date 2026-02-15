@@ -48,6 +48,27 @@ export const uploadSingleFile = async (file: File): Promise<FileUploadResponse> 
   return response.data;
 };
 
+
+export const  getBankCodes = async (
+  type:"ANM"| "PayStack"
+): Promise<{
+  assigned_code: string;
+  bank_name: string;
+}[]
+> => {
+  try {
+    const response = await api.get(
+      `/bank_codes/?type=${type}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch bank codes:", error);
+    throw error;
+  }
+};
+
+
+
 /**
  * Upload multiple files (max 6 files)
  * @param files - Array of files to upload (max 6)
