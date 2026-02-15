@@ -1,79 +1,88 @@
-"use client";
+'use client'
 
-import { Check, ChevronsUpDown } from "lucide-react";
-import * as React from "react";
-import { FixedSizeList as List } from "react-window";
+import { Check, ChevronsUpDown } from 'lucide-react'
+import * as React from 'react'
+import { FixedSizeList as List } from 'react-window'
 
-import { Button } from "@/components/ui/button";
+import { cn } from '@/lib/utils'
 import {
+  Button,
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@resolutinsurance/ipap-shared/components'
 
-const ITEM_HEIGHT = 36;
-const LIST_HEIGHT = 400;
+const ITEM_HEIGHT = 36
+const LIST_HEIGHT = 400
 
 export function Combobox({
   options,
   value,
   onChange,
-  placeholder = "Select an option...",
-  searchPlaceholder = "Search...",
+  placeholder = 'Select an option...',
+  searchPlaceholder = 'Search...',
   onSearch,
 }: {
-  options: { value: string; label: string; searchText?: string }[];
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
-  searchPlaceholder?: string;
-  onSearch?: (value: string) => void;
+  options: { value: string; label: string; searchText?: string }[]
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  searchPlaceholder?: string
+  onSearch?: (value: string) => void
 }) {
-  const [open, setOpen] = React.useState(false);
-  const [searchValue, setSearchValue] = React.useState("");
+  const [open, setOpen] = React.useState(false)
+  const [searchValue, setSearchValue] = React.useState('')
 
   const filteredOptions = React.useMemo(() => {
-    if (!searchValue) return options;
+    if (!searchValue) return options
     return options.filter((option) =>
       (option.searchText || option.label)
         .toLowerCase()
-        .includes(searchValue.toLowerCase())
-    );
-  }, [options, searchValue]);
+        .includes(searchValue.toLowerCase()),
+    )
+  }, [options, searchValue])
 
   const handleSearch = (value: string) => {
-    setSearchValue(value);
-    onSearch?.(value);
-  };
+    setSearchValue(value)
+    onSearch?.(value)
+  }
 
-  const Row = ({ index, style }: { index: number; style: React.CSSProperties }) => {
-    const option = filteredOptions[index];
+  const Row = ({
+    index,
+    style,
+  }: {
+    index: number
+    style: React.CSSProperties
+  }) => {
+    const option = filteredOptions[index]
     return (
       <CommandItem
         key={option.value}
         value={option.searchText || option.label}
         onSelect={(currentValue) => {
-          onChange(currentValue === value ? "" : option.value);
-          setOpen(false);
-          setSearchValue("");
+          onChange(currentValue === value ? '' : option.value)
+          setOpen(false)
+          setSearchValue('')
         }}
         style={style}
       >
         <Check
           className={cn(
-            "mr-2 h-4 w-4",
-            value === option.value ? "opacity-100" : "opacity-0"
+            'mr-2 h-4 w-4',
+            value === option.value ? 'opacity-100' : 'opacity-0',
           )}
         />
         {option.label}
       </CommandItem>
-    );
-  };
+    )
+  }
 
   return (
     <>
@@ -82,10 +91,12 @@ export function Combobox({
         type="button"
         role="combobox"
         aria-expanded={open}
-        className="w-full rounded-2xl justify-between"
+        className="w-full justify-between rounded-2xl"
         onClick={() => setOpen(true)}
       >
-        {value ? options.find((option) => option.value === value)?.label : placeholder}
+        {value
+          ? options.find((option) => option.value === value)?.label
+          : placeholder}
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
 
@@ -96,7 +107,7 @@ export function Combobox({
               {placeholder}
             </DialogTitle>
           </DialogHeader>
-          <Command className="rounded-lg border shadow-none border-none bg-transparent">
+          <Command className="rounded-lg border border-none bg-transparent shadow-none">
             <CommandInput
               placeholder={searchPlaceholder}
               onValueChange={handleSearch}
@@ -108,7 +119,10 @@ export function Combobox({
               ) : (
                 <CommandGroup>
                   <List
-                    height={Math.min(filteredOptions.length * ITEM_HEIGHT, LIST_HEIGHT)}
+                    height={Math.min(
+                      filteredOptions.length * ITEM_HEIGHT,
+                      LIST_HEIGHT,
+                    )}
                     itemCount={filteredOptions.length}
                     itemSize={ITEM_HEIGHT}
                     width="100%"
@@ -122,5 +136,5 @@ export function Combobox({
         </DialogContent>
       </Dialog>
     </>
-  );
+  )
 }
