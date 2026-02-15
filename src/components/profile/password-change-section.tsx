@@ -1,27 +1,27 @@
-"use client";
+'use client'
 
-import { Button } from "@/components/ui/button";
+import { PasswordFormData, passwordSchema } from '@/lib/schemas'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  Button,
+  ConfirmModal,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { ConfirmModal } from "@/components/ui/confirm-modal";
-import { PasswordInput } from "@/components/ui/password-input";
-import { PasswordFormData, passwordSchema } from "@/lib/schemas";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+  PasswordInput,
+} from '@resolutinsurance/ipap-shared/components'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 
 interface PasswordChangeModalProps {
-  userEmail?: string;
-  onChangePassword: (email: string, newPassword: string) => Promise<void>;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  userEmail?: string
+  onChangePassword: (email: string, newPassword: string) => Promise<void>
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }
 
 export const PasswordChangeModal = ({
@@ -30,45 +30,48 @@ export const PasswordChangeModal = ({
   open,
   onOpenChange,
 }: PasswordChangeModalProps) => {
-  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
-  const [passwordFormData, setPasswordFormData] = useState<PasswordFormData | null>(null);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
+  const [passwordFormData, setPasswordFormData] =
+    useState<PasswordFormData | null>(null)
 
   const passwordForm = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
     defaultValues: {
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
     },
-  });
+  })
 
   const onPasswordSubmit = (data: PasswordFormData) => {
-    setPasswordFormData(data);
-    setShowPasswordConfirm(true);
-  };
+    setPasswordFormData(data)
+    setShowPasswordConfirm(true)
+  }
 
   const onSubmitPassword = async () => {
-    if (!userEmail || !passwordFormData) return;
+    if (!userEmail || !passwordFormData) return
 
     try {
-      await onChangePassword(userEmail, passwordFormData.newPassword);
+      await onChangePassword(userEmail, passwordFormData.newPassword)
 
-      toast.success("Password changed successfully");
-      setShowPasswordConfirm(false);
-      passwordForm.reset();
-      onOpenChange(false);
+      toast.success('Password changed successfully')
+      setShowPasswordConfirm(false)
+      passwordForm.reset()
+      onOpenChange(false)
     } catch (err) {
-      console.error("Password change error:", err);
-      toast.error(err instanceof Error ? err.message : "Failed to change password");
+      console.error('Password change error:', err)
+      toast.error(
+        err instanceof Error ? err.message : 'Failed to change password',
+      )
     } finally {
-      setPasswordFormData(null);
+      setPasswordFormData(null)
     }
-  };
+  }
 
   const handleClose = () => {
-    passwordForm.reset();
-    onOpenChange(false);
-  };
+    passwordForm.reset()
+    onOpenChange(false)
+  }
 
   return (
     <>
@@ -89,7 +92,7 @@ export const PasswordChangeModal = ({
               <label className="text-sm font-medium">Current Password</label>
               <PasswordInput
                 className="rounded-xl"
-                {...passwordForm.register("currentPassword")}
+                {...passwordForm.register('currentPassword')}
               />
               {passwordForm.formState.errors.currentPassword && (
                 <p className="text-sm text-red-500">
@@ -102,7 +105,7 @@ export const PasswordChangeModal = ({
               <label className="text-sm font-medium">New Password</label>
               <PasswordInput
                 className="rounded-xl"
-                {...passwordForm.register("newPassword")}
+                {...passwordForm.register('newPassword')}
               />
               {passwordForm.formState.errors.newPassword && (
                 <p className="text-sm text-red-500">
@@ -115,7 +118,7 @@ export const PasswordChangeModal = ({
               <label className="text-sm font-medium">Confirm Password</label>
               <PasswordInput
                 className="rounded-xl"
-                {...passwordForm.register("confirmPassword")}
+                {...passwordForm.register('confirmPassword')}
               />
               {passwordForm.formState.errors.confirmPassword && (
                 <p className="text-sm text-red-500">
@@ -125,11 +128,7 @@ export const PasswordChangeModal = ({
             </div>
 
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-              >
+              <Button type="button" variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
               <Button type="submit">Update Password</Button>
@@ -147,5 +146,5 @@ export const PasswordChangeModal = ({
         confirmText="Change Password"
       />
     </>
-  );
-};
+  )
+}

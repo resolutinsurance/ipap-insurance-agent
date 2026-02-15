@@ -1,10 +1,12 @@
+import { useAuth } from '@/hooks/use-auth'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { ROUTES } from '@/lib/constants'
+import { cn, getNavigation } from '@/lib/utils'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -17,30 +19,26 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   useSidebar,
-} from "@/components/ui/sidebar";
-import { useAuth } from "@/hooks/use-auth";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { ROUTES } from "@/lib/constants";
-import { cn, getNavigation } from "@/lib/utils";
-import { LogOutIcon } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import Logo from "./ui/logo";
+} from '@resolutinsurance/ipap-shared/components'
+import { LogOutIcon } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import Logo from './ui/logo'
 
 export function AppSidebar() {
-  const pathname = usePathname();
-  const { logoutUser, userType } = useAuth();
-  const { setOpenMobile } = useSidebar();
-  const isMobile = useIsMobile();
+  const pathname = usePathname()
+  const { logoutUser, userType } = useAuth()
+  const { setOpenMobile } = useSidebar()
+  const isMobile = useIsMobile()
 
   const handleItemClick = () => {
     if (isMobile) {
-      setOpenMobile(false);
+      setOpenMobile(false)
     }
-  };
+  }
 
   if (!userType) {
-    return null; // Or a loading state
+    return null // Or a loading state
   }
 
   return (
@@ -62,14 +60,16 @@ export function AppSidebar() {
                 <SidebarMenuItem
                   key={item.href + item.label}
                   className={cn(
-                    !item.children && "rounded-full overflow-clip",
-                    !item.children && pathname === item.href && "bg-sidebar-accent"
+                    !item.children && 'overflow-clip rounded-full',
+                    !item.children &&
+                      pathname === item.href &&
+                      'bg-sidebar-accent',
                   )}
                 >
                   {item.children ? (
                     <Accordion type="single" collapsible>
                       <AccordionItem value={item.label.toLowerCase()}>
-                        <AccordionTrigger className="px-2 py-2 ">
+                        <AccordionTrigger className="px-2 py-2">
                           <div className="flex items-center gap-2">
                             <item.icon className="h-4 w-4" />
                             <span>{item.label}</span>
@@ -80,7 +80,7 @@ export function AppSidebar() {
                             {item.children.map((child) => (
                               <SidebarMenuSubItem
                                 key={child.href}
-                                className="rounded-full overflow-clip"
+                                className="overflow-clip rounded-full"
                               >
                                 <SidebarMenuSubButton
                                   asChild
@@ -89,7 +89,7 @@ export function AppSidebar() {
                                   <Link
                                     href={child.href}
                                     onClick={handleItemClick}
-                                    target={child.external ? "_blank" : "_self"}
+                                    target={child.external ? '_blank' : '_self'}
                                   >
                                     <div className="flex items-center gap-2">
                                       <child.icon className="h-4 w-4" />
@@ -107,7 +107,7 @@ export function AppSidebar() {
                     <Link
                       href={item.href}
                       onClick={handleItemClick}
-                      target={item.external ? "_blank" : "_self"}
+                      target={item.external ? '_blank' : '_self'}
                     >
                       <SidebarMenuButton
                         tooltip={item.label}
@@ -121,13 +121,13 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
 
-              {section.label === "Profile" && (
+              {section.label === 'Profile' && (
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     tooltip="Log Out"
                     onClick={() => {
-                      logoutUser();
-                      handleItemClick();
+                      logoutUser()
+                      handleItemClick()
                     }}
                   >
                     <LogOutIcon className="h-4 w-4" />
@@ -140,5 +140,5 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
     </Sidebar>
-  );
+  )
 }

@@ -1,24 +1,5 @@
-"use client";
+'use client'
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   DateRangePreset,
   ExportColumn,
@@ -26,126 +7,156 @@ import {
   exportData,
   formatDateForDisplay,
   getDateRangeFromPreset,
-} from "@/lib/utils/export";
-import { CalendarIcon, FileSpreadsheetIcon, FileTextIcon, Loader2 } from "lucide-react";
-import * as React from "react";
+} from '@/lib/utils/export'
+import {
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+  RadioGroup,
+  RadioGroupItem,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@resolutinsurance/ipap-shared/components'
+import {
+  CalendarIcon,
+  FileSpreadsheetIcon,
+  FileTextIcon,
+  Loader2,
+} from 'lucide-react'
+import * as React from 'react'
 
 export interface ExportConfig<T> {
   /** Current data to export (default when no range selected) */
-  data: T[];
+  data: T[]
   /** Function to fetch data with date range (optional - for when APIs support it) */
-  fetchForExport?: (startDate: Date, endDate: Date) => Promise<T[]>;
+  fetchForExport?: (startDate: Date, endDate: Date) => Promise<T[]>
   /** Column definitions for export (which fields to include, headers) */
-  columns: ExportColumn[];
+  columns: ExportColumn[]
   /** File name prefix for exported file */
-  filename: string;
+  filename: string
 }
 
 interface ExportModalProps<T> {
-  isOpen: boolean;
-  onClose: () => void;
-  config: ExportConfig<T>;
+  isOpen: boolean
+  onClose: () => void
+  config: ExportConfig<T>
 }
 
 const DATE_RANGE_PRESETS: { value: DateRangePreset; label: string }[] = [
-  { value: "allTime", label: "All Time (Current Data)" },
-  { value: "today", label: "Today" },
-  { value: "last7days", label: "Last 7 Days" },
-  { value: "thisMonth", label: "This Month" },
-  { value: "last30days", label: "Last 30 Days" },
-  { value: "thisQuarter", label: "This Quarter" },
-  { value: "thisYear", label: "This Year" },
-  { value: "custom", label: "Custom Range" },
-];
+  { value: 'allTime', label: 'All Time (Current Data)' },
+  { value: 'today', label: 'Today' },
+  { value: 'last7days', label: 'Last 7 Days' },
+  { value: 'thisMonth', label: 'This Month' },
+  { value: 'last30days', label: 'Last 30 Days' },
+  { value: 'thisQuarter', label: 'This Quarter' },
+  { value: 'thisYear', label: 'This Year' },
+  { value: 'custom', label: 'Custom Range' },
+]
 
 const FORMAT_OPTIONS: {
-  value: ExportFormat;
-  label: string;
-  description: string;
-  icon: React.ReactNode;
+  value: ExportFormat
+  label: string
+  description: string
+  icon: React.ReactNode
 }[] = [
   {
-    value: "csv",
-    label: "CSV",
-    description: "Comma-separated values, works with any spreadsheet app",
+    value: 'csv',
+    label: 'CSV',
+    description: 'Comma-separated values, works with any spreadsheet app',
     icon: <FileTextIcon className="h-5 w-5" />,
   },
   {
-    value: "xlsx",
-    label: "Excel (XLSX)",
-    description: "Microsoft Excel format with formatted columns",
+    value: 'xlsx',
+    label: 'Excel (XLSX)',
+    description: 'Microsoft Excel format with formatted columns',
     icon: <FileSpreadsheetIcon className="h-5 w-5" />,
   },
-];
+]
 
-export function ExportModal<T>({ isOpen, onClose, config }: ExportModalProps<T>) {
-  const [format, setFormat] = React.useState<ExportFormat>("csv");
+export function ExportModal<T>({
+  isOpen,
+  onClose,
+  config,
+}: ExportModalProps<T>) {
+  const [format, setFormat] = React.useState<ExportFormat>('csv')
   const [dateRangePreset, setDateRangePreset] =
-    React.useState<DateRangePreset>("allTime");
-  const [customStartDate, setCustomStartDate] = React.useState<string>("");
-  const [customEndDate, setCustomEndDate] = React.useState<string>("");
-  const [isExporting, setIsExporting] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+    React.useState<DateRangePreset>('allTime')
+  const [customStartDate, setCustomStartDate] = React.useState<string>('')
+  const [customEndDate, setCustomEndDate] = React.useState<string>('')
+  const [isExporting, setIsExporting] = React.useState(false)
+  const [error, setError] = React.useState<string | null>(null)
 
-  const hasDateRangeFetch = Boolean(config.fetchForExport);
+  const hasDateRangeFetch = Boolean(config.fetchForExport)
 
   // Get the computed date range based on preset or custom selection
-  const getComputedDateRange = (): { startDate: Date; endDate: Date } | null => {
-    if (dateRangePreset === "allTime") {
-      return null; // Use current data
+  const getComputedDateRange = (): {
+    startDate: Date
+    endDate: Date
+  } | null => {
+    if (dateRangePreset === 'allTime') {
+      return null // Use current data
     }
 
-    if (dateRangePreset === "custom") {
+    if (dateRangePreset === 'custom') {
       if (!customStartDate || !customEndDate) {
-        return null;
+        return null
       }
-      const startDate = new Date(customStartDate);
-      startDate.setHours(0, 0, 0, 0);
-      const endDate = new Date(customEndDate);
-      endDate.setHours(23, 59, 59, 999);
-      return { startDate, endDate };
+      const startDate = new Date(customStartDate)
+      startDate.setHours(0, 0, 0, 0)
+      const endDate = new Date(customEndDate)
+      endDate.setHours(23, 59, 59, 999)
+      return { startDate, endDate }
     }
 
-    return getDateRangeFromPreset(dateRangePreset);
-  };
+    return getDateRangeFromPreset(dateRangePreset)
+  }
 
   // Get display text for the selected date range
   const getDateRangeDisplay = (): string => {
-    if (dateRangePreset === "allTime") {
-      return "Using currently loaded data";
+    if (dateRangePreset === 'allTime') {
+      return 'Using currently loaded data'
     }
 
-    const range = getComputedDateRange();
+    const range = getComputedDateRange()
     if (!range) {
-      return "Select dates";
+      return 'Select dates'
     }
 
     return `${formatDateForDisplay(range.startDate)} - ${formatDateForDisplay(
-      range.endDate
-    )}`;
-  };
+      range.endDate,
+    )}`
+  }
 
   const handleExport = async () => {
-    setIsExporting(true);
-    setError(null);
+    setIsExporting(true)
+    setError(null)
 
     try {
-      let dataToExport: T[] = config.data;
+      let dataToExport: T[] = config.data
 
       // If a date range is selected and fetchForExport is available, fetch new data
-      const dateRange = getComputedDateRange();
+      const dateRange = getComputedDateRange()
       if (dateRange && config.fetchForExport) {
         try {
           dataToExport = await config.fetchForExport(
             dateRange.startDate,
-            dateRange.endDate
-          );
+            dateRange.endDate,
+          )
         } catch (fetchError) {
-          console.error("Failed to fetch data for export:", fetchError);
+          console.error('Failed to fetch data for export:', fetchError)
           setError(
-            "Failed to fetch data for the selected date range. Using currently loaded data instead."
-          );
-          dataToExport = config.data;
+            'Failed to fetch data for the selected date range. Using currently loaded data instead.',
+          )
+          dataToExport = config.data
         }
       } else if (dateRange && !config.fetchForExport) {
         // Date range selected but no fetch function available
@@ -154,9 +165,9 @@ export function ExportModal<T>({ isOpen, onClose, config }: ExportModalProps<T>)
       }
 
       if (dataToExport.length === 0) {
-        setError("No data available to export.");
-        setIsExporting(false);
-        return;
+        setError('No data available to export.')
+        setIsExporting(false)
+        return
       }
 
       await exportData({
@@ -164,30 +175,30 @@ export function ExportModal<T>({ isOpen, onClose, config }: ExportModalProps<T>)
         columns: config.columns,
         filename: config.filename,
         format,
-      });
+      })
 
-      onClose();
+      onClose()
     } catch (err) {
-      console.error("Export failed:", err);
-      setError("Export failed. Please try again.");
+      console.error('Export failed:', err)
+      setError('Export failed. Please try again.')
     } finally {
-      setIsExporting(false);
+      setIsExporting(false)
     }
-  };
+  }
 
   const handleClose = () => {
     if (!isExporting) {
-      setError(null);
-      setFormat("csv");
-      setDateRangePreset("allTime");
-      setCustomStartDate("");
-      setCustomEndDate("");
-      onClose();
+      setError(null)
+      setFormat('csv')
+      setDateRangePreset('allTime')
+      setCustomStartDate('')
+      setCustomEndDate('')
+      onClose()
     }
-  };
+  }
 
   const isCustomRangeValid =
-    dateRangePreset !== "custom" || (customStartDate && customEndDate);
+    dateRangePreset !== 'custom' || (customStartDate && customEndDate)
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -197,7 +208,7 @@ export function ExportModal<T>({ isOpen, onClose, config }: ExportModalProps<T>)
           <DialogDescription>
             Choose your export format and date range.
             {config.data.length > 0 && (
-              <span className="block mt-1 text-xs">
+              <span className="mt-1 block text-xs">
                 {config.data.length} records currently loaded
               </span>
             )}
@@ -216,18 +227,18 @@ export function ExportModal<T>({ isOpen, onClose, config }: ExportModalProps<T>)
               {FORMAT_OPTIONS.map((option) => (
                 <label
                   key={option.value}
-                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
                     format === option.value
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:bg-muted/50"
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:bg-muted/50'
                   }`}
                 >
                   <RadioGroupItem value={option.value} />
-                  <div className="flex items-center gap-3 flex-1">
+                  <div className="flex flex-1 items-center gap-3">
                     <div className="text-muted-foreground">{option.icon}</div>
                     <div className="flex-1">
-                      <div className="font-medium text-sm">{option.label}</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-sm font-medium">{option.label}</div>
+                      <div className="text-muted-foreground text-xs">
                         {option.description}
                       </div>
                     </div>
@@ -240,10 +251,10 @@ export function ExportModal<T>({ isOpen, onClose, config }: ExportModalProps<T>)
           {/* Date Range Selection */}
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+              <CalendarIcon className="text-muted-foreground h-4 w-4" />
               <Label className="text-sm font-medium">Date Range</Label>
               {!hasDateRangeFetch && (
-                <span className="text-xs text-muted-foreground ml-auto">
+                <span className="text-muted-foreground ml-auto text-xs">
                   (API filter coming soon)
                 </span>
               )}
@@ -251,7 +262,9 @@ export function ExportModal<T>({ isOpen, onClose, config }: ExportModalProps<T>)
 
             <Select
               value={dateRangePreset}
-              onValueChange={(value) => setDateRangePreset(value as DateRangePreset)}
+              onValueChange={(value) =>
+                setDateRangePreset(value as DateRangePreset)
+              }
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select date range" />
@@ -266,10 +279,12 @@ export function ExportModal<T>({ isOpen, onClose, config }: ExportModalProps<T>)
             </Select>
 
             {/* Custom Date Range Inputs */}
-            {dateRangePreset === "custom" && (
+            {dateRangePreset === 'custom' && (
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Start Date</Label>
+                  <Label className="text-muted-foreground text-xs">
+                    Start Date
+                  </Label>
                   <Input
                     type="date"
                     value={customStartDate}
@@ -278,7 +293,9 @@ export function ExportModal<T>({ isOpen, onClose, config }: ExportModalProps<T>)
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">End Date</Label>
+                  <Label className="text-muted-foreground text-xs">
+                    End Date
+                  </Label>
                   <Input
                     type="date"
                     value={customEndDate}
@@ -290,12 +307,13 @@ export function ExportModal<T>({ isOpen, onClose, config }: ExportModalProps<T>)
             )}
 
             {/* Date Range Display */}
-            {dateRangePreset !== "allTime" && (
-              <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+            {dateRangePreset !== 'allTime' && (
+              <div className="text-muted-foreground bg-muted/50 rounded p-2 text-xs">
                 {getDateRangeDisplay()}
                 {!hasDateRangeFetch && (
-                  <span className="block mt-1 text-amber-600">
-                    Note: Date filtering will use current data (API support pending)
+                  <span className="mt-1 block text-amber-600">
+                    Note: Date filtering will use current data (API support
+                    pending)
                   </span>
                 )}
               </div>
@@ -304,17 +322,24 @@ export function ExportModal<T>({ isOpen, onClose, config }: ExportModalProps<T>)
 
           {/* Error Message */}
           {error && (
-            <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-lg">
+            <div className="text-destructive bg-destructive/10 rounded-lg p-3 text-sm">
               {error}
             </div>
           )}
         </div>
 
         <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={handleClose} disabled={isExporting}>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isExporting}
+          >
             Cancel
           </Button>
-          <Button onClick={handleExport} disabled={isExporting || !isCustomRangeValid}>
+          <Button
+            onClick={handleExport}
+            disabled={isExporting || !isCustomRangeValid}
+          >
             {isExporting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -327,5 +352,5 @@ export function ExportModal<T>({ isOpen, onClose, config }: ExportModalProps<T>)
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

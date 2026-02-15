@@ -1,76 +1,77 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import { Button } from "./ui/button";
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "./ui/dialog";
+} from '@resolutinsurance/ipap-shared/components'
+import { useEffect, useState } from 'react'
 
 declare global {
   interface BeforeInstallPromptEvent extends Event {
-    prompt: () => void;
-    userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+    prompt: () => void
+    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
   }
 }
 
 export default function InstallPrompt() {
-  const [isIOS, setIsIOS] = useState(false);
-  const [isAndroid, setIsAndroid] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(
-    null
-  );
+  const [isIOS, setIsIOS] = useState(false)
+  const [isAndroid, setIsAndroid] = useState(false)
+  const [isStandalone, setIsStandalone] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null)
 
   useEffect(() => {
-    setIsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent) && !("MSStream" in window));
-    setIsAndroid(/Android/.test(navigator.userAgent));
-    setIsStandalone(window.matchMedia("(display-mode: standalone)").matches);
+    setIsIOS(
+      /iPad|iPhone|iPod/.test(navigator.userAgent) && !('MSStream' in window),
+    )
+    setIsAndroid(/Android/.test(navigator.userAgent))
+    setIsStandalone(window.matchMedia('(display-mode: standalone)').matches)
 
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
+      e.preventDefault()
+      setDeferredPrompt(e)
+    }
 
     window.addEventListener(
-      "beforeinstallprompt",
-      handleBeforeInstallPrompt as EventListener
-    );
+      'beforeinstallprompt',
+      handleBeforeInstallPrompt as EventListener,
+    )
 
     return () => {
       window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt as EventListener
-      );
-    };
-  }, []);
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt as EventListener,
+      )
+    }
+  }, [])
 
   const handleInstallClick = async () => {
     if (isStandalone) {
       // If the app is already installed, open the installed version
-      window.location.href = window.location.origin;
+      window.location.href = window.location.origin
     } else if (deferredPrompt) {
       // Show native install prompt
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") {
-        console.log("User accepted the install prompt");
+      deferredPrompt.prompt()
+      const { outcome } = await deferredPrompt.userChoice
+      if (outcome === 'accepted') {
+        console.log('User accepted the install prompt')
       } else {
-        console.log("User dismissed the install prompt");
+        console.log('User dismissed the install prompt')
       }
-      setDeferredPrompt(null);
+      setDeferredPrompt(null)
     } else {
       // Show manual installation steps
-      setShowModal(true);
+      setShowModal(true)
     }
-  };
+  }
 
   if (isStandalone) {
-    return null; // Don't show install button if already installed
+    return null // Don't show install button if already installed
   }
 
   return (
@@ -90,13 +91,13 @@ export default function InstallPrompt() {
             {isIOS && (
               <div className="space-y-2">
                 <h4 className="font-medium">For iOS devices:</h4>
-                <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+                <ol className="text-muted-foreground list-inside list-decimal space-y-1 text-sm">
                   <li>
-                    Tap the share button <span className="font-mono">⎋</span> at the
-                    bottom of your screen
+                    Tap the share button <span className="font-mono">⎋</span> at
+                    the bottom of your screen
                   </li>
                   <li>
-                    Scroll down and tap <strong>Add to Home Screen</strong>{" "}
+                    Scroll down and tap <strong>Add to Home Screen</strong>{' '}
                     <span className="font-mono">➕</span>
                   </li>
                   <li>
@@ -109,17 +110,18 @@ export default function InstallPrompt() {
             {isAndroid && (
               <div className="space-y-2">
                 <h4 className="font-medium">For Android devices:</h4>
-                <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+                <ol className="text-muted-foreground list-inside list-decimal space-y-1 text-sm">
                   <li>
-                    Tap the three dots menu <span className="font-mono">⋮</span> in your
-                    browser
+                    Tap the three dots menu <span className="font-mono">⋮</span>{' '}
+                    in your browser
                   </li>
                   <li>
-                    Select <strong>Add to Home Screen</strong> or{" "}
+                    Select <strong>Add to Home Screen</strong> or{' '}
                     <strong>Install App</strong>
                   </li>
                   <li>
-                    Tap <strong>Add</strong> or <strong>Install</strong> to confirm
+                    Tap <strong>Add</strong> or <strong>Install</strong> to
+                    confirm
                   </li>
                 </ol>
               </div>
@@ -128,11 +130,13 @@ export default function InstallPrompt() {
             {!isIOS && !isAndroid && (
               <div className="space-y-2">
                 <h4 className="font-medium">For other browsers:</h4>
-                <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-                  <li>Look for an install icon in your browser&apos;s address bar</li>
+                <ol className="text-muted-foreground list-inside list-decimal space-y-1 text-sm">
                   <li>
-                    Or check your browser&apos;s menu for &quot;Install&quot; or &quot;Add
-                    to Home Screen&quot;
+                    Look for an install icon in your browser&apos;s address bar
+                  </li>
+                  <li>
+                    Or check your browser&apos;s menu for &quot;Install&quot; or
+                    &quot;Add to Home Screen&quot;
                   </li>
                   <li>Follow your browser&apos;s installation prompts</li>
                 </ol>
@@ -142,5 +146,5 @@ export default function InstallPrompt() {
         </DialogContent>
       </Dialog>
     </>
-  );
+  )
 }

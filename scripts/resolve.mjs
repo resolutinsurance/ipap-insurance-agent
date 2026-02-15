@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 import fs from 'node:fs'
-import path from 'node:path'
 import { createRequire } from 'node:module'
+import path from 'node:path'
 import ts from 'typescript'
 
 const require = createRequire(import.meta.url)
-const PACKAGE_COMPONENTS_IMPORT = '@resolut/ipap-shared/components'
-const SHARED_PACKAGE_NAME = '@resolut/ipap-shared'
+const PACKAGE_COMPONENTS_IMPORT = '@resolutinsurance/ipap-shared/components'
+const SHARED_PACKAGE_NAME = '@resolutinsurance/ipap-shared'
 const CANDIDATE_EXPORT_FILE_RELATIVE_PATHS = [
   'dist/components/index.d.ts',
   'src/components/index.ts',
