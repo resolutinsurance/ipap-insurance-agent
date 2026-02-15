@@ -12,7 +12,7 @@ const SHARED_EXPORT_FILE_RELATIVE_PATHS = [
   'src/components/index.tsx',
 ]
 const SHARED_COMPONENTS_ENTRY = '@resolutinsurance/ipap-shared/components'
-const DEFAULT_PROTECTED_SLUGS = new Set(['sidebar'])
+const DEFAULT_PROTECTED_SLUGS = new Set([])
 const SUPPORTED_EXTENSIONS = new Set([
   '.ts',
   '.tsx',
