@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import { Input } from "@/components/ui/input";
+import { Input } from '@resolutinsurance/ipap-shared/components'
 
 interface VerifyIdGhanaCardInputProps {
-  ghanaCardNumber: string;
-  onGhanaCardNumberChange: (value: string) => void;
+  ghanaCardNumber: string
+  onGhanaCardNumberChange: (value: string) => void
 }
 
 export const VerifyIdGhanaCardInput = ({
@@ -30,5 +30,5 @@ export const VerifyIdGhanaCardInput = ({
         &quot;GHA&quot;.
       </p>
     </div>
-  );
-};
+  )
+}

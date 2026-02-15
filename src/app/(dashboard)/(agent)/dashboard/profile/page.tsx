@@ -1,41 +1,46 @@
-"use client";
+'use client'
 
 import {
   AgentProfileSection,
   PasswordChangeModal,
   PersonalDetailsSection,
   ProfilePictureSection,
-} from "@/components/profile";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/hooks/use-auth";
-import { USER_TYPES } from "@/lib/constants";
-import { User } from "@/lib/interfaces";
-import { KeyRound } from "lucide-react";
-import { useState } from "react";
+} from '@/components/profile'
+import { Button } from '@resolutinsurance/ipap-shared/components'
+import { Card, CardContent } from '@resolutinsurance/ipap-shared/components'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@resolutinsurance/ipap-shared/components'
+import { useAuth } from '@/hooks/use-auth'
+import { USER_TYPES } from '@/lib/constants'
+import { User } from '@/lib/interfaces'
+import { KeyRound } from 'lucide-react'
+import { useState } from 'react'
 
 const Page = () => {
-  const [activeTab, setActiveTab] = useState("account");
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const { user, updateUserProfile, changeUserPassword, userType } = useAuth();
+  const [activeTab, setActiveTab] = useState('account')
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
+  const { user, updateUserProfile, changeUserPassword, userType } = useAuth()
 
   // Check if user is an agent
-  const isAgent = userType === USER_TYPES.AGENT;
+  const isAgent = userType === USER_TYPES.AGENT
 
   const handlePasswordChange = async (email: string, newPassword: string) => {
     await changeUserPassword.mutateAsync({
       email,
       password: newPassword,
-    });
-  };
+    })
+  }
 
   const handleProfileUpdate = async (userId: string, data: Partial<User>) => {
     await updateUserProfile.mutateAsync({
       userId,
       data,
-    });
-  };
+    })
+  }
 
   return (
     <>
@@ -52,8 +57,12 @@ const Page = () => {
             </Button>
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="w-full sm:w-max flex-wrap">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-6"
+          >
+            <TabsList className="w-full flex-wrap sm:w-max">
               <TabsTrigger value="account" className="flex-1 sm:flex-none">
                 Account
               </TabsTrigger>
@@ -92,7 +101,7 @@ const Page = () => {
         onOpenChange={setIsPasswordModalOpen}
       />
     </>
-  );
-};
+  )
+}
 
-export default Page;
+export default Page

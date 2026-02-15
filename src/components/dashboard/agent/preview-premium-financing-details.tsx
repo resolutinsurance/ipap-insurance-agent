@@ -1,29 +1,29 @@
-"use client";
+'use client'
 
-import { Button } from "@/components/ui/button";
-import { usePremiumFinancingById } from "@/hooks/use-premium-financing";
-import { PaymentVerificationState } from "@/lib/store/payment-verification";
-import { formatCurrencyToGHS } from "@/lib/utils";
+import { usePremiumFinancingById } from '@/hooks/use-premium-financing'
+import { PaymentVerificationState } from '@/lib/store/payment-verification'
+import { formatCurrencyToGHS } from '@/lib/utils'
+import { Button } from '@resolutinsurance/ipap-shared/components'
 
 const PreviewPremiumFinancingDetails = ({
   id,
   onNext,
   onCancel,
 }: {
-  id: string;
-  onCancel: () => void;
-  onNext?: (loanData?: PaymentVerificationState["loanData"]) => void;
+  id: string
+  onCancel: () => void
+  onNext?: (loanData?: PaymentVerificationState['loanData']) => void
 }) => {
-  const { getPremiumFinancingById } = usePremiumFinancingById(id);
+  const { getPremiumFinancingById } = usePremiumFinancingById(id)
 
-  const premiumFinancing = getPremiumFinancingById.data;
+  const premiumFinancing = getPremiumFinancingById.data
 
   if (getPremiumFinancingById.isLoading) {
-    return <div>Loading...</div>;
+    return <div>Loading...</div>
   }
 
   if (getPremiumFinancingById.error) {
-    return <div>Error: {getPremiumFinancingById.error.message}</div>;
+    return <div>Error: {getPremiumFinancingById.error.message}</div>
   }
   return (
     <div className="space-y-6">
@@ -32,8 +32,10 @@ const PreviewPremiumFinancingDetails = ({
       {premiumFinancing && (
         <div className="grid grid-cols-1 gap-6">
           {/* Financing Details */}
-          <div className="bg-white p-4 rounded-lg border">
-            <h2 className="text-lg font-medium mb-3 text-gray-800">Financing Details</h2>
+          <div className="rounded-lg border bg-white p-4">
+            <h2 className="mb-3 text-lg font-medium text-gray-800">
+              Financing Details
+            </h2>
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">Premium Amount:</span>
@@ -57,8 +59,10 @@ const PreviewPremiumFinancingDetails = ({
           </div>
 
           {/* Payment Schedule */}
-          <div className="bg-white p-4 rounded-lg border">
-            <h2 className="text-lg font-medium mb-3 text-gray-800">Payment Schedule</h2>
+          <div className="rounded-lg border bg-white p-4">
+            <h2 className="mb-3 text-lg font-medium text-gray-800">
+              Payment Schedule
+            </h2>
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">Regular Installment:</span>
@@ -68,11 +72,15 @@ const PreviewPremiumFinancingDetails = ({
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Payment Frequency:</span>
-                <span className="font-medium">{premiumFinancing.paymentFrequency}</span>
+                <span className="font-medium">
+                  {premiumFinancing.paymentFrequency}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Number of Installments:</span>
-                <span className="font-medium">{premiumFinancing.noofInstallments}</span>
+                <span className="font-medium">
+                  {premiumFinancing.noofInstallments}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Total Repayment:</span>
@@ -93,11 +101,14 @@ const PreviewPremiumFinancingDetails = ({
                 if (premiumFinancing && onNext) {
                   // Extract loan data from premium financing (loan calculation done on agent side)
                   const initialDeposit = parseFloat(
-                    premiumFinancing.initialDeposit || "0"
-                  );
+                    premiumFinancing.initialDeposit || '0',
+                  )
                   const duration =
-                    premiumFinancing.duration || premiumFinancing.noofInstallments || 0;
-                  const paymentFrequency = premiumFinancing.paymentFrequency || "";
+                    premiumFinancing.duration ||
+                    premiumFinancing.noofInstallments ||
+                    0
+                  const paymentFrequency =
+                    premiumFinancing.paymentFrequency || ''
 
                   // Call onNext with loan data if we have valid data
                   if (duration > 0 && paymentFrequency) {
@@ -105,9 +116,9 @@ const PreviewPremiumFinancingDetails = ({
                       initialDeposit,
                       duration,
                       paymentFrequency,
-                    });
+                    })
                   } else {
-                    onNext();
+                    onNext()
                   }
                 }
               }}
@@ -125,7 +136,7 @@ const PreviewPremiumFinancingDetails = ({
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default PreviewPremiumFinancingDetails;
+export default PreviewPremiumFinancingDetails

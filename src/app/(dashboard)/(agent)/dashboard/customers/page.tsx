@@ -1,7 +1,7 @@
-"use client";
+'use client'
 
-import CustomerModal from "@/components/modals/customer-modal";
-import { RenderDataTable } from "@/components/table";
+import CustomerModal from '@/components/modals/customer-modal'
+import { RenderDataTable } from '@/components/table'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,94 +11,101 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { useAgent, useAgentCustomers } from "@/hooks/use-agent";
-import { USER_TYPES } from "@/lib/constants";
-import { User } from "@/lib/interfaces";
-import { ColumnDef } from "@tanstack/react-table";
-import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { toast } from "sonner";
+} from '@resolutinsurance/ipap-shared/components'
+import { Button } from '@resolutinsurance/ipap-shared/components'
+import { Card, CardContent } from '@resolutinsurance/ipap-shared/components'
+import { useAgent, useAgentCustomers } from '@/hooks/use-agent'
+import { USER_TYPES } from '@/lib/constants'
+import { User } from '@/lib/interfaces'
+import { ColumnDef } from '@tanstack/react-table'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 export default function CustomersPage() {
-  const { agent, deleteCustomer } = useAgent();
-  const { agentCustomersQuery, pagination } = useAgentCustomers(agent?.id || null);
-  const router = useRouter();
+  const { agent, deleteCustomer } = useAgent()
+  const { agentCustomersQuery, pagination } = useAgentCustomers(
+    agent?.id || null,
+  )
+  const router = useRouter()
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
-  const [selectedCustomer, setSelectedCustomer] = useState<User | null>(null);
-  const [customerToDelete, setCustomerToDelete] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add')
+  const [selectedCustomer, setSelectedCustomer] = useState<User | null>(null)
+  const [customerToDelete, setCustomerToDelete] = useState<string | null>(null)
 
   const handleDeleteCustomer = (customerId: string) => {
-    setCustomerToDelete(customerId);
-  };
+    setCustomerToDelete(customerId)
+  }
 
   const confirmDeleteCustomer = () => {
     if (customerToDelete) {
       deleteCustomer.mutate(customerToDelete, {
         onSuccess: () => {
-          setCustomerToDelete(null);
-          agentCustomersQuery.refetch();
-          toast.success("Customer deleted successfully");
+          setCustomerToDelete(null)
+          agentCustomersQuery.refetch()
+          toast.success('Customer deleted successfully')
         },
         onError: () => {
-          toast.error("Error deleting customer");
+          toast.error('Error deleting customer')
         },
-      });
+      })
     }
-  };
+  }
 
-  const openModal = (mode: "add" | "edit", customer?: User) => {
-    setModalMode(mode);
-    setSelectedCustomer(customer || null);
-    setIsModalOpen(true);
-  };
+  const openModal = (mode: 'add' | 'edit', customer?: User) => {
+    setModalMode(mode)
+    setSelectedCustomer(customer || null)
+    setIsModalOpen(true)
+  }
 
   const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedCustomer(null);
-  };
+    setIsModalOpen(false)
+    setSelectedCustomer(null)
+  }
 
   const handleRowClick = (customer: User) => {
-    if (!customer.id) return;
-    router.push(`/dashboard/customers/${customer.id}`);
-  };
+    if (!customer.id) return
+    router.push(`/dashboard/customers/${customer.id}`)
+  }
 
   // Define columns with actions
   const columns: ColumnDef<User>[] = useMemo(
     () => [
       {
-        accessorKey: "fullname",
-        header: "Name",
-        cell: ({ row }) => <span className="font-medium">{row.original.fullname}</span>,
+        accessorKey: 'fullname',
+        header: 'Name',
+        cell: ({ row }) => (
+          <span className="font-medium">{row.original.fullname}</span>
+        ),
       },
       {
-        accessorKey: "email",
-        header: "Email",
+        accessorKey: 'email',
+        header: 'Email',
       },
       {
-        accessorKey: "phone",
-        header: "Phone",
+        accessorKey: 'phone',
+        header: 'Phone',
       },
       {
-        accessorKey: "address",
-        header: "Address",
-        cell: ({ row }) => row.original.address || "N/A",
+        accessorKey: 'address',
+        header: 'Address',
+        cell: ({ row }) => row.original.address || 'N/A',
       },
       {
-        id: "actions",
+        id: 'actions',
         header: () => <div className="text-right">Actions</div>,
         cell: ({ row }) => (
-          <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="flex justify-end gap-2"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Button
               variant="outline"
               size="icon"
               className="h-8 w-8"
-              onClick={() => openModal("edit", row.original)}
+              onClick={() => openModal('edit', row.original)}
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -114,16 +121,16 @@ export default function CustomersPage() {
         ),
       },
     ],
-    []
-  );
+    [],
+  )
 
-  const customerData = agentCustomersQuery.data?.message || [];
+  const customerData = agentCustomersQuery.data?.message || []
 
   return (
-    <div className="container mx-auto py-4 sm:py-6 space-y-4 sm:space-y-6">
+    <div className="container mx-auto space-y-4 py-4 sm:space-y-6 sm:py-6">
       {/* Add Customer Button */}
       <div className="flex justify-end">
-        <Button onClick={() => openModal("add")}>
+        <Button onClick={() => openModal('add')}>
           <Plus className="mr-2 h-4 w-4" />
           Add Customer
         </Button>
@@ -155,7 +162,7 @@ export default function CustomersPage() {
         userType={USER_TYPES.AGENT}
         selectedCustomer={selectedCustomer}
         onSuccess={() => {
-          agentCustomersQuery.refetch();
+          agentCustomersQuery.refetch()
         }}
       />
 
@@ -168,8 +175,8 @@ export default function CustomersPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the customer and
-              all associated data.
+              This action cannot be undone. This will permanently delete the
+              customer and all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -184,5 +191,5 @@ export default function CustomersPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  );
+  )
 }

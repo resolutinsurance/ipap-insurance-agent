@@ -1,27 +1,27 @@
-import { Label } from "@/components/ui/label";
+import { PAYMENT_FREQUENCIES } from '@/lib/constants/bundle'
+import { PaymentFrequency } from '@/lib/interfaces'
 import {
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { PAYMENT_FREQUENCIES } from "@/lib/constants/bundle";
-import { PaymentFrequency } from "@/lib/interfaces";
+} from '@resolutinsurance/ipap-shared/components'
 
 interface PaymentFrequencySelectorProps {
-  value: PaymentFrequency;
-  onChange: (value: PaymentFrequency) => void;
-  id?: string;
-  label?: string;
-  options?: string[];
+  value: PaymentFrequency
+  onChange: (value: PaymentFrequency) => void
+  id?: string
+  label?: string
+  options?: string[]
 }
 
 export const PaymentFrequencySelector = ({
   value,
   onChange,
-  id = "paymentFrequency",
-  label = "Payment Frequency",
+  id = 'paymentFrequency',
+  label = 'Payment Frequency',
 }: PaymentFrequencySelectorProps) => {
   return (
     <div className="space-y-2">
@@ -39,5 +39,5 @@ export const PaymentFrequencySelector = ({
         </SelectContent>
       </Select>
     </div>
-  );
-};
+  )
+}
